@@ -103,6 +103,35 @@
   --radius-sm: calc(var(--radius) - 4px);
 }
 
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes bounce-subtle {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+@keyframes glow {
+  0%, 100% { box-shadow: 0 0 5px rgba(20, 184, 166, 0.2); }
+  50% { box-shadow: 0 0 20px rgba(20, 184, 166, 0.4); }
+}
+
+@layer utilities {
+  .animate-fade-in {
+    animation: fade-in 0.5s ease-out forwards;
+  }
+
+  .bounce-on-click:active {
+    animation: bounce-subtle 0.3s ease-out;
+  }
+
+  .hover-glow:hover {
+    animation: glow 1.5s infinite;
+  }
+}
+
 /* -------- Container Utility -------- */
 @utility container {
   margin-inline: auto;

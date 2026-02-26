@@ -1,16 +1,69 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Eye, EyeOff, Check } from 'lucide-react';
+import React, { useState, useContext } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Eye, EyeOff, Check, AlertCircle, CheckCircle, X } from 'lucide-react';
+import { toast } from 'sonner';
 import logo from '../../assets/Images/SkillPORT_logo.png';
+import { useGoogleLogin } from '@react-oauth/google';
+import { AuthContext } from '../../Context/AuthContext';
 
 const Login = () => {
+    const navigate = useNavigate();
+    const { login, googleLogin } = useContext(AuthContext);
     const [showPassword, setShowPassword] = useState(false);
     const [rememberMe, setRememberMe] = useState(false);
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+
+    const handleGoogleLogin = useGoogleLogin({
+        onSuccess: async (tokenResponse) => {
+            setIsLoading(true);
+            try {
+                // The tokenResponse.access_token is what we send to the backend
+                await googleLogin(tokenResponse.access_token);
+                toast.success('Google Login Successful', {
+                    description: 'You have logged in successfully.'
+                });
+                navigate('/userhomepage');
+            } catch (error) {
+                toast.error('Google Login Failed', {
+                    description: error.message || 'Failed to sign in with Google.'
+                });
+            } finally {
+                setIsLoading(false);
+            }
+        },
+        onError: () => {
+            toast.error('Google Login Failed', {
+                description: 'An error occurred during Google Sign In.'
+            });
+        }
+    });
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        if (!email || !password) return;
+
+        setIsLoading(true);
+        try {
+            await login(email, password);
+            toast.success('Login Successful', {
+                description: 'You have logged in successfully.'
+            });
+            navigate('/userhomepage');
+        } catch (error) {
+            toast.error('Login Failed', {
+                description: error.message || 'Login failed. Please check your credentials.'
+            });
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     return (
         <div className="flex min-h-screen w-full">
             {/* Left Side - Login Form */}
-            <div className="w-full lg:w-1/2 flex flex-col justify-center px-8 md:px-16 lg:px-24 bg-white">
+            <div className="w-full lg:w-1/2 flex flex-col justify-center px-8 md:px-16 lg:px-24 bg-[#F5F5F5]">
                 <div className="max-w-md w-full mx-auto">
                     {/* Logo */}
                     <div className="w-[100px] h-[70px]  mb-5 ml-36 rounded-xl  flex items-center justify-center">
@@ -32,7 +85,7 @@ const Login = () => {
                     </div>
 
                     {/* Form */}
-                    <form className="space-y-6">
+                    <form className="space-y-6" onSubmit={handleSubmit}>
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
                             <div className="relative">
@@ -45,6 +98,8 @@ const Login = () => {
                                     type="email"
                                     className="block w-full pl-10 pr-3 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition-all bg-gray-50"
                                     placeholder="Enter your email"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
                                 />
                             </div>
                         </div>
@@ -61,6 +116,8 @@ const Login = () => {
                                     type={showPassword ? "text" : "password"}
                                     className="block w-full pl-10 pr-10 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition-all bg-gray-50"
                                     placeholder="Enter your password"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
                                 />
                                 <button
                                     type="button"
@@ -94,13 +151,13 @@ const Login = () => {
 
                         <button
                             type="submit"
-                            className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-3 rounded-lg transition-colors shadow-lg shadow-emerald-500/20"
+                            className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-3 rounded-lg transition-colors shadow-lg shadow-emerald-500/20 disabled:opacity-70 disabled:cursor-not-allowed"
+                            disabled={isLoading}
                         >
-                            Sign In
+                            {isLoading ? 'Signing In...' : 'Sign In'}
                         </button>
                     </form>
 
-                    {/* Social Login */}
                     <div className="mt-8">
                         <div className="relative">
                             <div className="absolute inset-0 flex items-center">
@@ -112,7 +169,12 @@ const Login = () => {
                         </div>
 
                         <div className="mt-6 grid grid-cols-2 gap-4">
-                            <button className="flex items-center justify-center px-4 py-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                            <button 
+                                type="button"
+                                onClick={() => handleGoogleLogin()}
+                                disabled={isLoading}
+                                className="flex items-center justify-center px-4 py-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+                            >
                                 <img src="https://www.svgrepo.com/show/475656/google-color.svg" className="h-5 w-5 mr-2" alt="Google" />
                                 <span className="text-sm font-medium text-gray-700">Google</span>
                             </button>

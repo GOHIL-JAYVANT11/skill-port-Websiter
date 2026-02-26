@@ -1,10 +1,13 @@
+import { useContext } from 'react';
 import { Helmet } from 'react-helmet-async';
 import HomePage from './Page/HomePage';
-import Login from '../Components/Auth/Login';
-import Register from '../Components/Auth/Register';
+import UserHomePage from './Page/UserHomePage';
+import { AuthContext } from '../Context/AuthContext';
 
 
 const Index = () => {
+  const { user } = useContext(AuthContext);
+
   return (
     <>
       <Helmet>
@@ -40,11 +43,8 @@ const Index = () => {
       
       <div className="min-h-screen bg-background">
         <main>
-          <HomePage />
-          {/* <Login /> */}
-          {/* <Register /> */}
+          {user && user.role === 'seeker' ? <UserHomePage /> : <HomePage />}
         </main>
-        {/* <Footer /> */}
       </div>
     </>
   );
