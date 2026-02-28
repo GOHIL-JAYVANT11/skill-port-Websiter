@@ -1,5 +1,5 @@
 import React from 'react';
-import JobsHeader from '../../Components/Jobs/JobsHeader';
+import UserNavbar from '../../Components/UserHomePage/UserNavbar';
 import JobFilterSidebar from '../../Components/Jobs/JobFilterSidebar';
 import JobsListing from '../../Components/Jobs/JobsListing';
 import Footer from '../../Components/Home/Footer';
@@ -7,7 +7,7 @@ import Footer from '../../Components/Home/Footer';
 const Jobs = () => {
   return (
     <div className="min-h-screen bg-[#F8FAFC]">
-      <JobsHeader onMenuToggle={() => {}} />
+      <UserNavbar onMenuToggle={() => {}} />
       
       <main className="pt-24 pb-12 max-w-[1280px] mx-auto px-4 sm:px-6">
         <div className="flex flex-col lg:flex-row gap-8">

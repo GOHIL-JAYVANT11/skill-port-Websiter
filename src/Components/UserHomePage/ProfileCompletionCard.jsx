@@ -1,9 +1,11 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { User, ChevronRight, FileText, Zap, Briefcase, Sparkles } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { AuthContext } from '../../Context/AuthContext';
 
 const ProfileCompletionCard = () => {
   const navigate = useNavigate();
+  const { user } = useContext(AuthContext);
   const completionPercentage = 68;
 
   const missingDetails = [
@@ -13,18 +15,33 @@ const ProfileCompletionCard = () => {
   ];
 
   return (
-    <div className="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-slate-100 group relative overflow-hidden max-w-3xl">
+    <div className="bg-white rounded-2xl   p-4 sm:p-5 shadow-sm border border-slate-100 group relative overflow-hidden max-w-3xl">
       <div className="absolute top-0 right-0 w-48 h-48 bg-teal-500/5 rounded-full -mr-24 -mt-24 blur-2xl group-hover:scale-110 transition-transform duration-700" />
       
       <div className="flex flex-col md:flex-row items-center gap-4 sm:gap-6 relative z-10">
         {/* Left: Progress Circle */}
         <div className="relative shrink-0">
           <svg className="w-16 h-16 transform -rotate-90">
-            <circle cx="32" cy="32" r="28" stroke="currentColor" strokeWidth="5" fill="transparent" className="text-slate-100" />
-            <circle cx="32" cy="32" r="28" stroke="currentColor" strokeWidth="5" fill="transparent" strokeDasharray="175.93" strokeDashoffset={175.93 - (175.93 * completionPercentage) / 100} strokeLinecap="round" className="text-teal-500 transition-all duration-1000" />
+            <circle cx="32" cy="32" r="28" stroke="currentColor" strokeWidth="3" fill="transparent" className="text-slate-100" />
+            <circle cx="32" cy="32" r="28" stroke="currentColor" strokeWidth="3" fill="transparent" strokeDasharray="175.93" strokeDashoffset={175.93 - (175.93 * completionPercentage) / 100} strokeLinecap="round" className="text-teal-500 transition-all duration-1000" />
           </svg>
-          <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <span className="text-sm font-black text-slate-900 leading-none">{completionPercentage}%</span>
+          <div className="absolute inset-0 flex flex-col items-center justify-center p-2">
+            {user?.profilePic ? (
+              <div className="w-full h-full rounded-full overflow-hidden border-2 border-white shadow-sm bg-slate-100">
+                <img 
+                  src={user.profilePic.trim().replace(/^`|`$/g, '')} 
+                  alt={user.Fullname} 
+                  className="w-full h-full object-cover"
+                  referrerPolicy="no-referrer"
+                  onError={(e) => {
+                    e.target.style.display = 'none';
+                    e.target.parentElement.innerHTML = `<span class="text-[10px] font-black text-slate-900">${completionPercentage}%</span>`;
+                  }}
+                />
+              </div>
+            ) : (
+              <span className="text-sm font-black text-slate-900 leading-none">{completionPercentage}%</span>
+            )}
           </div>
         </div>
 

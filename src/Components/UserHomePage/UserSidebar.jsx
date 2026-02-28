@@ -41,7 +41,7 @@ const SidebarItem = ({ icon: Icon, label, active = false, badge, to = "#" }) => 
 const UserSidebar = ({ isOpen, onClose }) => {
   const location = useLocation();
   const menuItems = [
-    { icon: LayoutDashboard, label: 'My Dashboard', to: '/userhomepage' },
+    { icon: LayoutDashboard, label: 'My Dashboard', to: '/user-home' },
     { icon: FileText, label: 'My Applications', to: '/my-applications' },
     { icon: Heart, label: 'Saved Jobs', to: '/saved-jobs' },
     { icon: Calendar, label: 'Interviews', to: '/interviews' },

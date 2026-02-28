@@ -1,4 +1,4 @@
-import React, { createContext, useState, useCallback, useEffect } from 'react';
+import React, { createContext, useState, useCallback, useEffect, useRef } from 'react';
 
 export const AuthContext = createContext();
 
@@ -7,6 +7,8 @@ export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const isInitialized = useRef(false);
+  const fetchingRef = useRef(false);
 
   const getCookie = (name) => {
     const value = `; ${document.cookie}`;
@@ -24,25 +26,94 @@ export const AuthProvider = ({ children }) => {
     document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
   };
 
+  const fetchProfile = useCallback(async (authToken) => {
+    const currentToken = authToken || token || getCookie('token');
+    if (!currentToken) {
+      setLoading(false);
+      return;
+    }
+
+    // Prevent concurrent calls
+    if (fetchingRef.current) return;
+    fetchingRef.current = true;
+
+    try {
+      const response = await fetch('http://localhost:4518/gknbvg/SkillPort-user/ertqyuiok/get-profile', {
+        headers: {
+          'Authorization': `Bearer ${currentToken}`
+        }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        // Merge user and education data if it exists in data.data
+        if (data.data?.user) {
+          const rawUser = data.data.user;
+          const rawData = data.data;
+
+          // Helper to pick the best data source (prefer non-empty sibling over nested)
+          const pickBest = (sibling, nested) => {
+            if (Array.isArray(sibling) && sibling.length > 0) return sibling;
+            if (Array.isArray(nested) && nested.length > 0) return nested;
+            return sibling || nested || [];
+          };
+
+          const education = pickBest(
+            rawData.education || rawData.Education,
+            rawUser.education || rawUser.Education
+          );
+          
+          const projects = pickBest(
+            rawData.projects || rawData.Projects,
+            rawUser.projects || rawUser.Projects
+          );
+          
+          const SocialLinks = pickBest(
+            rawData.SocialLinks || rawData.socialLinks,
+            rawUser.SocialLinks || rawUser.socialLinks
+          );
+
+          const certification = pickBest(
+            rawData.certifications || rawData.Certification || rawData.certification,
+            rawUser.certifications || rawUser.Certification || rawUser.certification
+          );
+
+          setUser({
+            ...rawUser,
+            education,
+            projects,
+            SocialLinks,
+            certifications: certification
+          });
+        } else {
+          setUser(data.data || data.user || data);
+        }
+      } else {
+        // If token is invalid and we were trying to refresh, logout
+        if (!authToken) logout();
+      }
+    } catch (err) {
+      console.error('Error fetching profile:', err);
+    } finally {
+      setLoading(false);
+      fetchingRef.current = false;
+    }
+  }, [token]);
+
   // Check if user is logged in (from cookies)
   useEffect(() => {
+    if (isInitialized.current) return;
+    isInitialized.current = true;
+
     const savedToken = getCookie('token');
     const savedUserId = getCookie('userId');
-    const savedName = getCookie('name');
-    const savedNumber = getCookie('number');
-    const savedRole = getCookie('role') || 'seeker';
     
     if (savedToken && savedUserId) {
       setToken(savedToken);
-      setUser({
-        _id: savedUserId,
-        Fullname: savedName || 'User',
-        number: savedNumber || '',
-        role: savedRole
-      });
+      fetchProfile(savedToken);
+    } else {
+      setLoading(false);
     }
-    setLoading(false);
-  }, []);
+  }, [fetchProfile]);
 
   // Login function
   const login = useCallback(async (email, password) => {
@@ -92,7 +163,7 @@ export const AuthProvider = ({ children }) => {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch('http://localhost:4518/auth/google/callback', {
+      const response = await fetch('http://localhost:4518/api/auth/google', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ token: credential })
@@ -121,32 +192,6 @@ export const AuthProvider = ({ children }) => {
       if (userObj.number) setCookie('number', userObj.number);
       if (userObj.role) setCookie('role', userObj.role);
       
-      return data;
-    } catch (err) {
-      setError(err.message);
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  // Register function
-  const register = useCallback(async (userData) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await fetch('http://localhost:4518/gknbvg/SkillPort-user/ertqyuiok/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(userData)
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => null);
-        throw new Error(errorData?.message || 'Registration failed');
-      }
-
-      const data = await response.json();
       return data;
     } catch (err) {
       setError(err.message);
@@ -187,9 +232,9 @@ export const AuthProvider = ({ children }) => {
     error,
     login,
     googleLogin,
-    register,
     logout,
     updateUser,
+    fetchProfile,
     isAuthenticated: !!token
   };
 

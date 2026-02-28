@@ -1,9 +1,19 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Search, Bell, MessageSquare, ChevronDown, User, LogOut, Settings, Briefcase, Menu, X } from 'lucide-react';
+import React, { useState, useContext } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Search, Bell, MessageSquare, ChevronDown, User, LogOut, Settings, Briefcase, Menu, X, CreditCard } from 'lucide-react';
 import logo from '../../assets/Images/SkillPORT_logo.png';
+import { AuthContext } from '../../Context/AuthContext';
 
 const UserNavbar = ({ onMenuToggle }) => {
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const { user, logout } = useContext(AuthContext);
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
+
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-200 h-16 px-4 flex items-center justify-between">
       <div className="flex items-center flex-1">
@@ -26,7 +36,7 @@ const UserNavbar = ({ onMenuToggle }) => {
         {/* Navigation Links & Search Bar Group (Centered on Left) */}
         <div className="hidden md:flex items-center gap-8 flex-1 max-w-4xl">
           <div className="flex items-center gap-6">
-            <Link to="/userhomepage" className="text-sm font-semibold text-slate-600 hover:text-teal-600 transition-colors whitespace-nowrap">Home</Link>
+            <Link to="/user-home" className="text-sm font-semibold text-slate-600 hover:text-teal-600 transition-colors whitespace-nowrap">Home</Link>
             <Link to="/jobs" className="text-sm font-semibold text-slate-600 hover:text-teal-600 transition-colors whitespace-nowrap">Jobs</Link>
             <Link to="/companies" className="text-sm font-semibold text-slate-600 hover:text-teal-600 transition-colors whitespace-nowrap">Companies</Link>
             <Link to="/freelance" className="text-sm font-semibold text-slate-600 hover:text-teal-600 transition-colors whitespace-nowrap">Freelancing</Link>
@@ -69,15 +79,92 @@ const UserNavbar = ({ onMenuToggle }) => {
         </div>
 
         {/* Profile Dropdown */}
-        <div className="flex items-center gap-1.5 md:gap-3 pl-2 border-l border-slate-200 cursor-pointer group">
-          <div className="w-7 h-7 md:w-9 md:h-9 rounded-full bg-gradient-to-tr from-teal-500 to-teal-700 flex items-center justify-center text-white font-bold text-[10px] md:text-sm shadow-sm border-2 border-white">
-            JD
+        <div className="relative">
+          <div 
+            className="flex items-center gap-1.5 md:gap-3 pl-2 border-l border-slate-200 cursor-pointer group"
+            onClick={() => setIsProfileOpen(!isProfileOpen)}
+          >
+            <div className="w-7 h-7 md:w-9 md:h-9 rounded-full bg-gradient-to-tr from-teal-500 to-teal-700 flex items-center justify-center text-white font-bold text-[10px] md:text-sm shadow-sm border-2 border-white overflow-hidden">
+              {user?.profilePic ? (
+                <img 
+                  src={user.profilePic.trim().replace(/^`|`$/g, '')} 
+                  alt={user.Fullname} 
+                  className="w-full h-full object-cover" 
+                  referrerPolicy="no-referrer"
+                  onError={(e) => {
+                    e.target.style.display = 'none';
+                    e.target.parentElement.innerHTML = user?.Fullname?.split(' ').map(n => n[0]).join('') || 'JD';
+                  }}
+                />
+              ) : (
+                user?.Fullname?.split(' ').map(n => n[0]).join('') || 'JD'
+              )}
+            </div>
+            <div className="hidden md:block">
+              <p className="text-[11px] md:text-sm font-semibold text-slate-800 leading-none">
+                {user?.Fullname || 'User'}
+              </p>
+              <p className="text-[9px] md:text-[10px] text-slate-500 font-medium uppercase mt-1">
+                {user?.Role && user.Role.length > 0 ? user.Role[0] : 'Job Seeker'}
+              </p>
+            </div>
+            <ChevronDown className={`w-3 h-3 md:w-4 md:h-4 text-slate-400 group-hover:text-slate-600 transition-all ${isProfileOpen ? 'rotate-180' : ''}`} />
           </div>
-          <div className="hidden md:block">
-            <p className="text-[11px] md:text-sm font-semibold text-slate-800 leading-none">John Doe</p>
-            <p className="text-[9px] md:text-[10px] text-slate-500 font-medium uppercase mt-1">Job Seeker</p>
-          </div>
-          <ChevronDown className="w-3 h-3 md:w-4 md:h-4 text-slate-400 group-hover:text-slate-600 transition-colors" />
+
+          {/* Dropdown Menu */}
+          {isProfileOpen && (
+            <>
+              {/* Backdrop to close dropdown */}
+              <div 
+                className="fixed inset-0 z-10" 
+                onClick={() => setIsProfileOpen(false)}
+              ></div>
+              
+              <div className="absolute right-0 mt-2 w-64 bg-white rounded-2xl shadow-xl border border-slate-100 py-2 z-20 animate-in fade-in slide-in-from-top-2 duration-200">
+                <div className="px-4 py-3 border-b border-slate-50">
+                  <p className="text-sm font-bold text-slate-900">{user?.Fullname || 'User'}</p>
+                  <p className="text-xs text-slate-500 truncate">{user?.email || ''}</p>
+                </div>
+                
+                <div className="py-1">
+                  <Link 
+                    to="/profile" 
+                    className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-50 hover:text-teal-600 transition-colors"
+                    onClick={() => setIsProfileOpen(false)}
+                  >
+                    <User className="w-4 h-4" />
+                    <span className="font-medium">View & Update Profile</span>
+                  </Link>
+                  <Link 
+                    to="/job-postings" 
+                    className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-50 hover:text-teal-600 transition-colors"
+                    onClick={() => setIsProfileOpen(false)}
+                  >
+                    <Briefcase className="w-4 h-4" />
+                    <span className="font-medium">Job Postings Account</span>
+                  </Link>
+                  <Link 
+                    to="/settings" 
+                    className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-50 hover:text-teal-600 transition-colors"
+                    onClick={() => setIsProfileOpen(false)}
+                  >
+                    <Settings className="w-4 h-4" />
+                    <span className="font-medium">Settings</span>
+                  </Link>
+                </div>
+                
+                <div className="mt-1 pt-1 border-t border-slate-50">
+                  <button 
+                    onClick={handleLogout}
+                    className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    <span className="font-medium">Logout</span>
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </nav>

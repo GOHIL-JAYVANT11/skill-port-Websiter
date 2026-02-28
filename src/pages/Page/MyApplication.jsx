@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import JobsHeader from '../../Components/Jobs/JobsHeader';
+import UserNavbar from '../../Components/UserHomePage/UserNavbar';
 import UserSidebar from '../../Components/UserHomePage/UserSidebar';
 import Footer from '../../Components/Home/Footer';
 import ApplicationCard from '../../Components/MyApplication/ApplicationCard';
@@ -97,7 +97,7 @@ const MyApplication = () => {
 
   return (
     <div className="min-h-screen bg-[#F8FAFC]">
-      <JobsHeader onMenuToggle={() => setIsSidebarOpen(!isSidebarOpen)} />
+      <UserNavbar onMenuToggle={() => setIsSidebarOpen(!isSidebarOpen)} />
       
       <main className="pt-24 pb-12 max-w-[1440px] mx-auto px-4 sm:px-6">
         <div className="flex flex-col lg:flex-row gap-8 items-start">

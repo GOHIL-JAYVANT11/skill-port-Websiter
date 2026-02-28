@@ -77,7 +77,7 @@ const Header = () => {
       <div className="container mx-auto max-h-[45px] px-4 lg:px-6">
         <nav className="flex max-h-[50px] items-center justify-between">
           {/* Logo */}
-          <a href="#" className="flex items-center gap-1">
+          <a href="/" className="flex items-center gap-1">
             <div className="w-[100px] h-[70px] pt-1.5 rounded-xl  flex items-center justify-center">
               <img
                 src={logo}
@@ -88,19 +88,20 @@ const Header = () => {
             <span className="text-xl font-bold">
               Skill<span className="text-[#39C5B9]">PORT</span>
             </span>
-            {/* Desktop Navigation */}
-            <div className="hidden lg:flex ml-44 items-center gap-12">
-              {navItems.map((item) => (
-                <a
-                  key={item.label}
-                  href={item.href}
-                  className="text-muted-foreground hover:text-foreground transition-colors font-bold text-sm"
-                >
-                  {item.label}
-                </a>
-              ))}
-            </div>
           </a>
+
+          {/* Desktop Navigation */}
+          <div className="hidden lg:flex items-center gap-12 ml-[-150px]">
+            {navItems.map((item) => (
+              <a
+                key={item.label}
+                href={item.href}
+                className="text-muted-foreground hover:text-foreground transition-colors font-bold text-sm"
+              >
+                {item.label}
+              </a>
+            ))}
+          </div>
 
           {/* Desktop CTA Buttons */}
           <div className="hidden lg:flex items-center gap-3">

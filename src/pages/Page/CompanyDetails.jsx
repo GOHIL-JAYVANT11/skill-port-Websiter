@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import JobsHeader from '../../Components/Jobs/JobsHeader';
+import UserNavbar from '../../Components/UserHomePage/UserNavbar';
 import CompanyDetailsHeader from '../../Components/Companies/CompanyDetailsHeader';
 import CompanyDetailsTabs from '../../Components/Companies/CompanyDetailsTabs';
 import CompanyDetailsSidebar from '../../Components/Companies/CompanyDetailsSidebar';
@@ -18,33 +18,31 @@ const CompanyDetails = () => {
       name: 'SkillTech Pvt Ltd',
       industry: 'IT & Software',
       location: 'Ahmedabad, Gujarat',
-      rating: 4.5,
-      reviewsCount: 120,
-      openPositions: 8,
-      foundedYear: '2015',
-      followersCount: '12.4k',
+      rating: 4.8,
+      reviews: 124,
+      employees: '50-200',
+      founded: '2018',
+      about: 'SkillTech is a leading software development company based in Ahmedabad, Gujarat. We specialize in building custom web and mobile applications for global clients.',
       logo: '',
-      about: 'SkillTech is a skill-driven IT company focused on AI recruitment solutions...'
+      website: 'https://skilltech.com',
+      specialties: ['Web Development', 'Mobile App Development', 'UI/UX Design', 'Cloud Computing'],
+      currentJobs: [
+        { id: 1, title: 'Senior Frontend Developer', location: 'Ahmedabad', type: 'Full-time' },
+        { id: 2, title: 'Backend Engineer (Node.js)', location: 'Remote', type: 'Full-time' }
+      ]
     };
 
     setTimeout(() => {
       setCompany(mockCompany);
       setLoading(false);
-      window.scrollTo(0, 0);
-    }, 300);
+    }, 500);
   }, [id]);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center">
-        <div className="w-8 h-8 border-3 border-teal-600 border-t-transparent rounded-full animate-spin"></div>
-      </div>
-    );
-  }
+  if (loading) return null;
 
   return (
     <div className="min-h-screen bg-[#F8FAFC]">
-      <JobsHeader onMenuToggle={() => {}} />
+      <UserNavbar onMenuToggle={() => {}} />
       
       {/* Company Profile Header */}
       <CompanyDetailsHeader company={company} />

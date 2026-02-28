@@ -26,7 +26,7 @@ const JobsHeader = ({ onMenuToggle }) => {
         {/* Navigation Links & Search Bar Group */}
         <div className="hidden md:flex items-center gap-8 flex-1 max-w-4xl">
           <div className="flex items-center gap-6">
-            <Link to="/userhomepage" className="text-sm font-semibold text-slate-600 hover:text-teal-600 transition-colors whitespace-nowrap">Home</Link>
+            <Link to="/user-home" className="text-sm font-semibold text-slate-600 hover:text-teal-600 transition-colors whitespace-nowrap">Home</Link>
             <Link to="/jobs" className="text-sm font-semibold text-teal-600 border-b-2 border-teal-600 py-1 transition-colors whitespace-nowrap">Jobs</Link>
             <Link to="/companies" className="text-sm font-semibold text-slate-600 hover:text-teal-600 transition-colors whitespace-nowrap">Companies</Link>
             <Link to="/freelance" className="text-sm font-semibold text-slate-600 hover:text-teal-600 transition-colors whitespace-nowrap">Freelancing</Link>

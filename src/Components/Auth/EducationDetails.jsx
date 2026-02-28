@@ -250,7 +250,7 @@ export const EducationDetails = ({ onComplete, authToken, userId }) => {
         });
 
         if (onComplete) onComplete();
-        navigate('/userhomepage');
+        navigate('/user-home');
       } else {
         const data = await response.json();
         toast.error('Failed to save details', {

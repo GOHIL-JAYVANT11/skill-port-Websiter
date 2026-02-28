@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { 
   FileText, 
   Type, 
@@ -11,19 +11,30 @@ import {
   Target, 
   Heart 
 } from 'lucide-react';
+import { AuthContext } from '../../Context/AuthContext';
 
 const QuickLinks = () => {
+  const { user } = useContext(AuthContext);
+
   const links = [
-    { label: 'Resume', icon: FileText, status: 'Upload' },
-    { label: 'Resume headline', icon: Type, status: 'Add' },
-    { label: 'Key skills', icon: Zap, status: 'Add' },
-    { label: 'Education', icon: GraduationCap, status: 'Add' },
-    { label: 'IT skills', icon: Monitor, status: 'Add' },
-    { label: 'Projects', icon: Briefcase, status: 'Add' },
-    { label: 'Accomplishments', icon: Award, status: 'Add' },
-    { label: 'Career profile', icon: Target, status: 'Add' },
-    { label: 'Personal details', icon: Heart, status: 'Add' },
+    { label: 'Resume', icon: FileText, status: user?.resume ? 'Update' : 'Upload', id: 'resume' },
+    { label: 'Resume headline', icon: Type, status: user?.resumeHeadline ? 'Edit' : 'Add', id: 'resume' },
+    { label: 'Key skills', icon: Zap, status: user?.skill?.length > 0 ? 'Edit' : 'Add', id: 'skills' },
+    { label: 'Education', icon: GraduationCap, status: user?.education?.length > 0 ? 'Edit' : 'Add', id: 'education' },
+    { label: 'Career profile', icon: Target, status: 'Edit', id: 'career' },
+    { label: 'Certification', icon: Award, status: (user?.certifications?.length > 0 || user?.SocialLinks?.length > 0) ? 'Edit' : 'Add', id: 'accomplishments' },
+    { label: 'Projects', icon: Briefcase, status: user?.projects?.length > 0 ? 'Edit' : 'Add', id: 'accomplishments' },
   ];
+
+  const scrollToSection = (id) => {
+    const element = document.getElementById(id);
+    if (element) {
+      element.scrollIntoView({ 
+        behavior: 'smooth',
+        block: 'start'
+      });
+    }
+  };
 
   return (
     <div className="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 sticky top-24">
@@ -32,6 +43,7 @@ const QuickLinks = () => {
         {links.map((link, idx) => (
           <button 
             key={idx}
+            onClick={() => scrollToSection(link.id)}
             className="w-full flex items-center justify-between px-3 py-3 rounded-xl hover:bg-slate-50 transition-all group"
           >
             <div className="flex items-center gap-3">

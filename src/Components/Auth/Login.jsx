@@ -16,15 +16,16 @@ const Login = () => {
     const [isLoading, setIsLoading] = useState(false);
 
     const handleGoogleLogin = useGoogleLogin({
-        onSuccess: async (tokenResponse) => {
+        onSuccess: async (credentialResponse) => {
+            console.log(credentialResponse);
             setIsLoading(true);
             try {
-                // The tokenResponse.access_token is what we send to the backend
-                await googleLogin(tokenResponse.access_token);
+                // The credentialResponse.access_token is what we send to the backend
+                await googleLogin(credentialResponse.access_token);
                 toast.success('Google Login Successful', {
                     description: 'You have logged in successfully.'
                 });
-                navigate('/userhomepage');
+                navigate('/user-home');
             } catch (error) {
                 toast.error('Google Login Failed', {
                     description: error.message || 'Failed to sign in with Google.'
@@ -50,7 +51,7 @@ const Login = () => {
             toast.success('Login Successful', {
                 description: 'You have logged in successfully.'
             });
-            navigate('/userhomepage');
+            navigate('/user-home');
         } catch (error) {
             toast.error('Login Failed', {
                 description: error.message || 'Login failed. Please check your credentials.'

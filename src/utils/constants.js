@@ -118,3 +118,27 @@ export const ANIMATION_DURATION = {
   NORMAL: 300,
   SLOW: 500,
 };
+
+// Skills List
+export const SKILLS_LIST = [
+  'React.js',
+  'Node.js',
+  'MongoDB',
+  'JavaScript',
+  'TypeScript',
+  'Python',
+  'Java',
+  'C++',
+  'AWS',
+  'Docker',
+  'Kubernetes',
+  'SQL',
+  'Next.js',
+  'Tailwind CSS',
+  'Redux',
+  'Express.js',
+  'GraphQL',
+  'PostgreSQL',
+  'Git',
+  'Figma',
+];

@@ -4,6 +4,7 @@ import { Eye, EyeOff, Check, User, Briefcase, Phone, Mail, Lock, ArrowRight, X, 
 import { toast } from 'sonner';
 import logo from '../../assets/Images/SkillPORT_logo.png';
 import { EducationDetails } from './EducationDetails';
+import { useGoogleLogin } from '@react-oauth/google';
 
 const Register = () => {
   const navigate = useNavigate();
@@ -23,6 +24,42 @@ const Register = () => {
   const [otp, setOtp] = useState(new Array(6).fill(""));
   const [authDetails, setAuthDetails] = useState({ token: '', userId: '' });
 
+  const handleGoogleRegister = useGoogleLogin({
+    onSuccess: async (credentialResponse) => {
+      console.log('Google Register Response:', credentialResponse);
+      setIsLoading(true);
+      try {
+        // Fetch user profile from Google using the access token
+        const res = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+          headers: { Authorization: `Bearer ${credentialResponse.access_token}` },
+        });
+        const profile = await res.json();
+
+        // Fill up the form inputs with Google profile data
+        setFormData(prev => ({
+          ...prev,
+          fullName: profile.name || '',
+          email: profile.email || '',
+        }));
+
+        toast.success('Google Profile Loaded!', {
+          description: `Welcome ${profile.name}! Your details have been filled. Please provide your phone and password.`
+        });
+      } catch (error) {
+        toast.error('Google Sign-in Error', {
+          description: 'Failed to retrieve your Google profile. Please try manually.'
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    onError: () => {
+      toast.error('Google Sign-in Failed', {
+        description: 'An error occurred during Google Sign-in.'
+      });
+    }
+  });
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
@@ -32,21 +69,23 @@ const Register = () => {
     e.preventDefault();
     
     if (!agreed) {
-      alert("Please agree to the Terms of Service");
+      toast.error('Terms & Conditions', {
+        description: 'Please agree to the Terms of Service and Privacy Policy.'
+      });
       return;
     }
 
     setIsLoading(true);
 
-   let roles = [];
-
-        if (userType === 'seeker') {
-          roles.push('Job Seeker');
-
-          if (isFreelancer) {
-            roles.push('Freelancer');
-          }
-        }
+    let roles = [];
+    if (userType === 'seeker') {
+      roles.push('Job Seeker');
+      if (isFreelancer) {
+        roles.push('Freelancer');
+      }
+    } else {
+      roles.push('Recruiter');
+    }
 
     const payload = {
       "Fullname": formData.fullName,
@@ -66,14 +105,21 @@ const Register = () => {
       });
 
       if (response.ok) {
+        toast.success('Registration Initiated', {
+          description: 'A verification code has been sent to your email.'
+        });
         setRegistrationStep('otp');
       } else {
         const errorData = await response.json();
-        alert('Registration failed: ' + (errorData.message || 'Unknown error'));
+        toast.error('Registration Failed', {
+          description: errorData.message || 'Please check your information and try again.'
+        });
       }
     } catch (error) {
       console.error('Error registering:', error);
-      alert('Network error. Please try again.');
+      toast.error('Network Error', {
+        description: 'Unable to connect to the server. Please check your connection and try again.'
+      });
     } finally {
       setIsLoading(false);
     }
@@ -380,6 +426,26 @@ const Register = () => {
           </div>
 
           {/* Form */}
+          <div className="mb-6">
+            <button
+              type="button"
+              onClick={() => handleGoogleRegister()}
+              disabled={isLoading}
+              className="w-full flex items-center justify-center gap-3 px-4 py-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-all font-medium text-gray-700 disabled:opacity-50"
+            >
+              <img src="https://www.svgrepo.com/show/475656/google-color.svg" className="h-5 w-5" alt="Google" />
+              Sign up with Google
+            </button>
+            <div className="relative my-6">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-200"></div>
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-white text-gray-400">or register with email</span>
+              </div>
+            </div>
+          </div>
+
           <form className="space-y-5" onSubmit={handleRegister}>
             {/* Full Name */}
             <div>

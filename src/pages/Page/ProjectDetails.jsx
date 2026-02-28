@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import JobsHeader from '../../Components/Jobs/JobsHeader';
+import UserNavbar from '../../Components/UserHomePage/UserNavbar';
 import Footer from '../../Components/Home/Footer';
 import ProposalModal from '../../Components/Freelancing/ProposalModal';
 import { IndianRupee, Clock, Briefcase, Star, ShieldCheck, Building2, Flame, Paperclip, MessageSquare } from 'lucide-react';
@@ -52,7 +52,7 @@ const ProjectDetails = () => {
 
   return (
     <div className="min-h-screen bg-[#F8FAFC]">
-      <JobsHeader onMenuToggle={() => {}} />
+      <UserNavbar onMenuToggle={() => {}} />
       
       <main className="pt-24 pb-12 max-w-[1280px] mx-auto px-4 sm:px-6">
         <div className="flex flex-col lg:flex-row gap-8 items-start">

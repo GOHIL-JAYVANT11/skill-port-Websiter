@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../Context/AuthContext';
 import UserNavbar from '../../Components/UserHomePage/UserNavbar';
@@ -11,9 +11,19 @@ import LocationCard from '../../Components/UserHomePage/LocationCard';
 import RightPanel from '../../Components/UserHomePage/RightPanel';
 
 const UserHomePage = () => {
-  const { user, loading } = useContext(AuthContext);
+  const { user, loading, fetchProfile } = useContext(AuthContext);
   const navigate = useNavigate();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  const isMounted = useRef(false);
+
+  useEffect(() => {
+    // Always fetch profile on mount to ensure we have full/fresh data
+    if (!isMounted.current) {
+      fetchProfile();
+      isMounted.current = true;
+    }
+  }, [fetchProfile]);
 
   useEffect(() => {
     if (!loading) {

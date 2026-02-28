@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import JobsHeader from '../../Components/Jobs/JobsHeader';
+import UserNavbar from '../../Components/UserHomePage/UserNavbar';
 import JobDetailsHeader from '../../Components/Jobs/JobDetailsHeader';
 import JobDetailsContent from '../../Components/Jobs/JobDetailsContent';
 import JobDetailsSidebar from '../../Components/Jobs/JobDetailsSidebar';
@@ -18,36 +18,47 @@ const JobDetails = () => {
       title: 'Senior Frontend Developer (React)',
       companyName: 'TechFlow Systems',
       companyLogo: '', 
-      location: 'Remote, Bangalore',
-      salary: '₹18L - ₹25L PA',
-      experience: '3-5 Yrs',
-      postedTime: '2 hrs ago',
-      skills: ['React', 'TypeScript', 'Tailwind CSS', 'Next.js', 'Redux', 'Jest'],
-      matchPercentage: 95,
-      description: "We are looking for a Senior Frontend Developer who is passionate about building great products. You will be working on our core platform and helping us scale our frontend architecture. You will be responsible for leading the frontend team and ensuring high code quality.",
-      companyRating: '4.8',
-      industry: 'Software & IT',
-      companyAbout: "TechFlow Systems is a leading global technology services and solutions provider. We specialize in digital transformation, cloud services, and custom software development. With a team of over 500+ experts, we help businesses across the globe to innovate and scale."
+      location: 'Ahmedabad, Gujarat (Remote)',
+      salary: '₹12L - ₹18L per year',
+      experience: '3-5 Years',
+      jobType: 'Full-time',
+      postedAt: '2 days ago',
+      applications: 142,
+      description: `
+        ### About the Role
+        We are looking for a passionate Senior Frontend Developer to join our growing team. You will be responsible for building high-quality, scalable web applications using React.js and modern frontend technologies.
+
+        ### Responsibilities
+        - Develop new user-facing features using React.js
+        - Build reusable components and frontend libraries for future use
+        - Optimize applications for maximum speed and scalability
+        - Collaborate with back-end developers and web designers to improve usability
+        - Ensure high quality graphic standards and brand consistency
+
+        ### Requirements
+        - 3+ years of professional experience with React.js
+        - Proficiency in JavaScript, including DOM manipulation and the JavaScript object model
+        - Experience with state management libraries like Redux or Context API
+        - Knowledge of modern authorization mechanisms, such as JSON Web Token
+        - Familiarity with modern frontend build pipelines and tools
+        - Ability to understand business requirements and translate them into technical requirements
+      `,
+      skills: ['React', 'JavaScript', 'TypeScript', 'Redux', 'Tailwind CSS'],
+      benefits: ['Remote Work', 'Health Insurance', 'Flexible Hours', 'Learning Stipend'],
+      companyInfo: 'TechFlow Systems is a leading software solutions provider focused on building innovative digital products for global clients.'
     };
 
     setTimeout(() => {
       setJob(mockJob);
       setLoading(false);
-      window.scrollTo(0, 0);
-    }, 300);
+    }, 500);
   }, [id]);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center">
-        <div className="w-8 h-8 border-3 border-teal-600 border-t-transparent rounded-full animate-spin"></div>
-      </div>
-    );
-  }
+  if (loading) return null;
 
   return (
     <div className="min-h-screen bg-[#F8FAFC]">
-      <JobsHeader onMenuToggle={() => {}} />
+      <UserNavbar onMenuToggle={() => {}} />
       
       {/* Sticky Job Header */}
       <JobDetailsHeader job={job} />
