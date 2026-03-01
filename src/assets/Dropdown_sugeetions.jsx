@@ -230,3 +230,30 @@ export const percentageOptions = [
   "95-99.9%",
   "100%"
 ];
+
+export const designationOptions = [
+  "HR",
+  "Founder",
+  "Talent Acquisition"
+];
+
+export const companySizeOptions = [
+  "1-10",
+  "10-50",
+  "50-200",
+  "200+"
+];
+
+export const industryOptions = [
+  "Information Technology",
+  "Healthcare",
+  "Finance",
+  "Education",
+  "Manufacturing",
+  "Retail",
+  "Real Estate",
+  "Transportation",
+  "Telecommunications",
+  "Energy",
+  "Other"
+];

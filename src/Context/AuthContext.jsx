@@ -120,7 +120,7 @@ export const AuthProvider = ({ children }) => {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch('http://localhost:4518/gknbvg/SkillPort-user/ertqyuiok/login', {
+      const response = await fetch('http://localhost:4518/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password })

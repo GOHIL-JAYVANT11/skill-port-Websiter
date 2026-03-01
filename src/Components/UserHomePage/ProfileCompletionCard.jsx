@@ -1,18 +1,30 @@
 import React, { useContext } from 'react';
-import { User, ChevronRight, FileText, Zap, Briefcase, Sparkles } from 'lucide-react';
+import { User, ChevronRight, FileText, Zap, Briefcase, Sparkles, GraduationCap } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../Context/AuthContext';
 
 const ProfileCompletionCard = () => {
   const navigate = useNavigate();
   const { user } = useContext(AuthContext);
-  const completionPercentage = 68;
 
   const missingDetails = [
-    { label: 'Resume missing', boost: '+10%', icon: FileText, color: 'text-rose-500', bg: 'bg-rose-50' },
-    { label: 'Skills incomplete', boost: '+8%', icon: Zap, color: 'text-amber-500', bg: 'bg-amber-50' },
-    { label: 'Experience missing', boost: '+15%', icon: Briefcase, color: 'text-blue-500', bg: 'bg-blue-50' },
-  ];
+    { label: 'Resume missing', boost: '+10%', icon: FileText, color: 'text-rose-500', bg: 'bg-rose-50', show: !user?.resume },
+    { label: 'Skills incomplete', boost: '+8%', icon: Zap, color: 'text-amber-500', bg: 'bg-amber-50', show: !user?.skill || user?.skill?.length === 0 },
+    { label: 'Education missing', boost: '+10%', icon: GraduationCap, color: 'text-teal-500', bg: 'bg-teal-50', show: !user?.education || user?.education?.length === 0 },
+    { label: 'Projects missing', boost: '+15%', icon: Briefcase, color: 'text-blue-500', bg: 'bg-blue-50', show: !user?.projects || user?.projects?.length === 0 },
+  ].filter(item => item.show);
+
+  // Dynamic completion calculation (simple approximation)
+  const totalWeight = 100;
+  let currentStrength = 30; // Base strength
+  if (user?.resume) currentStrength += 15;
+  if (user?.skill?.length > 0) currentStrength += 15;
+  if (user?.education?.length > 0) currentStrength += 15;
+  if (user?.projects?.length > 0) currentStrength += 10;
+  if (user?.certifications?.length > 0) currentStrength += 10;
+  if (user?.SocialLinks?.length > 0) currentStrength += 5;
+  
+  const completionPercentage = Math.min(currentStrength, 100);
 
   return (
     <div className="bg-white rounded-2xl   p-4 sm:p-5 shadow-sm border border-slate-100 group relative overflow-hidden max-w-3xl">

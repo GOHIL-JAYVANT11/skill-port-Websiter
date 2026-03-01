@@ -4,6 +4,7 @@ import { Eye, EyeOff, Check, User, Briefcase, Phone, Mail, Lock, ArrowRight, X, 
 import { toast } from 'sonner';
 import logo from '../../assets/Images/SkillPORT_logo.png';
 import { EducationDetails } from './EducationDetails';
+import { RecruiterDetails } from './RecruiterDetails';
 import { useGoogleLogin } from '@react-oauth/google';
 
 const Register = () => {
@@ -96,7 +97,10 @@ const Register = () => {
     };
 
     try {
-      const response = await fetch('http://localhost:4518/gknbvg/SkillPort-user/ertqyuiok/register', {
+      const endpoint = userType === 'recruiter'
+        ? 'http://localhost:4518/gknbvg/SkillPort-recruiter/ertqyuiok/register'
+        : 'http://localhost:4518/api/auth/register';
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -173,7 +177,7 @@ const Register = () => {
 
   const handleResendOtp = async () => {
     try {
-      const response = await fetch('http://localhost:4518/gknbvg/SkillPort-user/ertqyuiok/resend-otp', {
+      const response = await fetch('http://localhost:4518/api/auth/resend-otp', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -213,7 +217,7 @@ const Register = () => {
     setIsVerifying(true);
 
     try {
-      const response = await fetch('http://localhost:4518/gknbvg/SkillPort-user/ertqyuiok/verify-otp', {
+      const response = await fetch('http://localhost:4518/api/auth/verify-otp', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -236,13 +240,14 @@ const Register = () => {
           document.cookie = `userId=${userId}; path=/; max-age=86400`; // Expires in 24 hours
         }
 
+        const setCookie = (name, value, days = 1) => {
+          const expires = new Date(Date.now() + days * 864e5).toUTCString();
+          document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/`;
+        };
+
         if (userType === 'seeker') {
              setAuthDetails({ token, userId });
-             // Save basic info to cookies temporarily for EducationDetails to use
-             const setCookie = (name, value, days = 1) => {
-               const expires = new Date(Date.now() + days * 864e5).toUTCString();
-               document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/`;
-             };
+             
              if (token) setCookie('token', token);
              if (userId) setCookie('userId', userId);
              if (formData.fullName) setCookie('name', formData.fullName);
@@ -254,10 +259,18 @@ const Register = () => {
              });
              setRegistrationStep('education');
         } else {
+             setAuthDetails({ token, userId });
+             
+             if (token) setCookie('token', token);
+             if (userId) setCookie('userId', userId);
+             if (formData.fullName) setCookie('name', formData.fullName);
+             if (formData.phone) setCookie('number', formData.phone);
+             setCookie('role', 'recruiter');
+
              toast.success('Verified Successfully!', {
-                 description: 'Your account has been successfully verified and created.'
+                 description: 'Your email has been verified. Please complete your company profile.'
              });
-             navigate('/login');
+             setRegistrationStep('recruiterDetails');
         }
 
        
@@ -299,6 +312,12 @@ const Register = () => {
         {registrationStep === 'education' ? (
              <EducationDetails 
                 onComplete={handleEducationComplete} 
+                authToken={authDetails.token} 
+                userId={authDetails.userId}
+             />
+        ) : registrationStep === 'recruiterDetails' ? (
+             <RecruiterDetails 
+                onComplete={() => navigate('/HomePage')} 
                 authToken={authDetails.token} 
                 userId={authDetails.userId}
              />
