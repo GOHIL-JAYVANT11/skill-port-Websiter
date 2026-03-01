@@ -38,54 +38,55 @@ export const AuthProvider = ({ children }) => {
     fetchingRef.current = true;
 
     try {
-      const response = await fetch('http://localhost:4518/gknbvg/SkillPort-user/ertqyuiok/get-profile', {
+      const roleCookie = getCookie('Role');
+      const isRecruiter = (roleCookie || '').toLowerCase() === 'recruiter';
+      const profileUrl = isRecruiter
+        ? 'http://localhost:4518/gknbvg/SkillPort-recruiter/ertqyuiok/get-Recuiter-profile'
+        : 'http://localhost:4518/gknbvg/SkillPort-user/ertqyuiok/get-profile';
+      const response = await fetch(profileUrl, {
         headers: {
           'Authorization': `Bearer ${currentToken}`
         }
       });
       if (response.ok) {
         const data = await response.json();
-        // Merge user and education data if it exists in data.data
-        if (data.data?.user) {
-          const rawUser = data.data.user;
-          const rawData = data.data;
-
-          // Helper to pick the best data source (prefer non-empty sibling over nested)
-          const pickBest = (sibling, nested) => {
-            if (Array.isArray(sibling) && sibling.length > 0) return sibling;
-            if (Array.isArray(nested) && nested.length > 0) return nested;
-            return sibling || nested || [];
-          };
-
-          const education = pickBest(
-            rawData.education || rawData.Education,
-            rawUser.education || rawUser.Education
-          );
-          
-          const projects = pickBest(
-            rawData.projects || rawData.Projects,
-            rawUser.projects || rawUser.Projects
-          );
-          
-          const SocialLinks = pickBest(
-            rawData.SocialLinks || rawData.socialLinks,
-            rawUser.SocialLinks || rawUser.socialLinks
-          );
-
-          const certification = pickBest(
-            rawData.certifications || rawData.Certification || rawData.certification,
-            rawUser.certifications || rawUser.Certification || rawUser.certification
-          );
-
-          setUser({
-            ...rawUser,
-            education,
-            projects,
-            SocialLinks,
-            certifications: certification
-          });
+        if (isRecruiter) {
+          setUser(data.data || data.recruiter || data.user || data);
         } else {
-          setUser(data.data || data.user || data);
+          if (data.data?.user) {
+            const rawUser = data.data.user;
+            const rawData = data.data;
+            const pickBest = (sibling, nested) => {
+              if (Array.isArray(sibling) && sibling.length > 0) return sibling;
+              if (Array.isArray(nested) && nested.length > 0) return nested;
+              return sibling || nested || [];
+            };
+            const education = pickBest(
+              rawData.education || rawData.Education,
+              rawUser.education || rawUser.Education
+            );
+            const projects = pickBest(
+              rawData.projects || rawData.Projects,
+              rawUser.projects || rawUser.Projects
+            );
+            const SocialLinks = pickBest(
+              rawData.SocialLinks || rawData.socialLinks,
+              rawUser.SocialLinks || rawUser.socialLinks
+            );
+            const certification = pickBest(
+              rawData.certifications || rawData.Certification || rawData.certification,
+              rawUser.certifications || rawUser.Certification || rawUser.certification
+            );
+            setUser({
+              ...rawUser,
+              education,
+              projects,
+              SocialLinks,
+              certifications: certification
+            });
+          } else {
+            setUser(data.data || data.user || data);
+          }
         }
       } else {
         // If token is invalid and we were trying to refresh, logout
@@ -147,7 +148,10 @@ export const AuthProvider = ({ children }) => {
       if (userObj._id) setCookie('userId', userObj._id);
       if (userObj.Fullname) setCookie('name', userObj.Fullname);
       if (userObj.number) setCookie('number', userObj.number);
-      if (userObj.role) setCookie('role', userObj.role);
+      const roleValueLogin = Array.isArray(data.Role) ? data.Role[0] : (data.Role );
+      if (roleValueLogin) {
+        setCookie('Role', roleValueLogin);
+      }
       
       return data;
     } catch (err) {
@@ -190,7 +194,10 @@ export const AuthProvider = ({ children }) => {
       if (userObj._id) setCookie('userId', userObj._id);
       if (userObj.Fullname) setCookie('name', userObj.Fullname);
       if (userObj.number) setCookie('number', userObj.number);
-      if (userObj.role) setCookie('role', userObj.role);
+      const roleValueGoogle = Array.isArray(data.Role) ? data.Role[0] : (data.Role || data.role || userObj.role);
+      if (roleValueGoogle) {
+        setCookie('Role', roleValueGoogle);
+      }
       
       return data;
     } catch (err) {
@@ -211,6 +218,7 @@ export const AuthProvider = ({ children }) => {
     deleteCookie('name');
     deleteCookie('number');
     deleteCookie('role');
+    deleteCookie('Role');
     localStorage.removeItem('authToken');
     localStorage.removeItem('user');
   }, []);
@@ -220,7 +228,10 @@ export const AuthProvider = ({ children }) => {
     setUser(userData);
     if (userData.Fullname) setCookie('name', userData.Fullname);
     if (userData.number) setCookie('number', userData.number);
-    if (userData.role) setCookie('role', userData.role);
+    const roleValueUpdate = Array.isArray(userData.Role) ? userData.Role[0] : (userData.Role || userData.role);
+    if (roleValueUpdate) {
+      setCookie('Role', roleValueUpdate);
+    }
     if (userData._id) setCookie('userId', userData._id);
     localStorage.setItem('user', JSON.stringify(userData));
   }, []);

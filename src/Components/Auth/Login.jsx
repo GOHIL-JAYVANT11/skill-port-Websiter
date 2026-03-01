@@ -15,13 +15,19 @@ const Login = () => {
     const [password, setPassword] = useState('');
     const [isLoading, setIsLoading] = useState(false);
 
+    const setRoleCookie = (val) => {
+        const expires = new Date(Date.now() + 864e5).toUTCString();
+        document.cookie = `Role=${encodeURIComponent(val)}; expires=${expires}; path=/; SameSite=Lax`;
+    };
+
     const handleGoogleLogin = useGoogleLogin({
         onSuccess: async (credentialResponse) => {
             console.log(credentialResponse);
             setIsLoading(true);
             try {
-                // The credentialResponse.access_token is what we send to the backend
-                await googleLogin(credentialResponse.access_token);
+                const data = await googleLogin(credentialResponse.access_token);
+                const roleValue = Array.isArray(data?.Role) ? data.Role[0] : (data?.Role);
+                if (roleValue) setRoleCookie(roleValue);
                 toast.success('Google Login Successful', {
                     description: 'You have logged in successfully.'
                 });
@@ -47,7 +53,9 @@ const Login = () => {
 
         setIsLoading(true);
         try {
-            await login(email, password);
+            const data = await login(email, password);
+            const roleValue = Array.isArray(data?.Role) ? data.Role[0] : (data?.Role );
+            if (roleValue) setRoleCookie(roleValue);
             toast.success('Login Successful', {
                 description: 'You have logged in successfully.'
             });
