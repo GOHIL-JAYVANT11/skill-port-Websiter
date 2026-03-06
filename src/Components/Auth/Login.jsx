@@ -26,12 +26,17 @@ const Login = () => {
             setIsLoading(true);
             try {
                 const data = await googleLogin(credentialResponse.access_token);
-                const roleValue = Array.isArray(data?.Role) ? data.Role[0] : (data?.Role);
+                const roleValue = Array.isArray(data?.Role) ? data.Role[0] : (data?.Role || data?.role);
                 if (roleValue) setRoleCookie(roleValue);
                 toast.success('Google Login Successful', {
                     description: 'You have logged in successfully.'
                 });
-                navigate('/user-home');
+                
+                if (roleValue && roleValue.toLowerCase() === 'recruiter') {
+                    navigate('/recruiter-home');
+                } else {
+                    navigate('/user-home');
+                }
             } catch (error) {
                 toast.error('Google Login Failed', {
                     description: error.message || 'Failed to sign in with Google.'
@@ -54,12 +59,17 @@ const Login = () => {
         setIsLoading(true);
         try {
             const data = await login(email, password);
-            const roleValue = Array.isArray(data?.Role) ? data.Role[0] : (data?.Role );
+            const roleValue = Array.isArray(data?.Role) ? data.Role[0] : (data?.Role || data?.role );
             if (roleValue) setRoleCookie(roleValue);
             toast.success('Login Successful', {
                 description: 'You have logged in successfully.'
             });
-            navigate('/user-home');
+            
+            if (roleValue && roleValue.toLowerCase() === 'recruiter') {
+                navigate('/recruiter-home');
+            } else {
+                navigate('/user-home');
+            }
         } catch (error) {
             toast.error('Login Failed', {
                 description: error.message || 'Login failed. Please check your credentials.'

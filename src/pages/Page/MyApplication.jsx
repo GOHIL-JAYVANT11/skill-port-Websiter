@@ -1,14 +1,25 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
 import UserNavbar from '../../Components/UserHomePage/UserNavbar';
 import UserSidebar from '../../Components/UserHomePage/UserSidebar';
 import Footer from '../../Components/Home/Footer';
 import ApplicationCard from '../../Components/MyApplication/ApplicationCard';
 import ApplicationHeader from '../../Components/MyApplication/ApplicationHeader';
+import { AuthContext } from '../../Context/AuthContext';
 
 const MyApplication = () => {
   const [activeTab, setActiveTab] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const { user } = useContext(AuthContext);
+  const navigate = useNavigate();
+  const isRecruiter = user?.role?.toLowerCase() === 'recruiter' || user?.Role?.[0]?.toLowerCase() === 'recruiter';
+
+  useEffect(() => {
+    if (isRecruiter) {
+      navigate('/recruiter-home');
+    }
+  }, [isRecruiter, navigate]);
 
   const applications = [
     {

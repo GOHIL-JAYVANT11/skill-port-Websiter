@@ -1,64 +1,56 @@
-import React, { useEffect, useState } from 'react';
+import React, { useMemo, useContext } from 'react';
 import { useParams } from 'react-router-dom';
 import UserNavbar from '../../Components/UserHomePage/UserNavbar';
+import RecruiterNavbar from '../../Components/Recuiters-Home/RecruiterNavbar';
 import JobDetailsHeader from '../../Components/Jobs/JobDetailsHeader';
 import JobDetailsContent from '../../Components/Jobs/JobDetailsContent';
 import JobDetailsSidebar from '../../Components/Jobs/JobDetailsSidebar';
 import Footer from '../../Components/Home/Footer';
+import { AuthContext } from '../../Context/AuthContext';
+import { JobContext } from '../../Context/JobContext';
 
 const JobDetails = () => {
   const { id } = useParams();
-  const [job, setJob] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const { user } = useContext(AuthContext);
+  const { jobs, loading } = useContext(JobContext);
+  const isRecruiter = user?.role?.toLowerCase() === 'recruiter' || user?.Role?.[0]?.toLowerCase() === 'recruiter';
 
-  // Mock data fetching
-  useEffect(() => {
-    const mockJob = {
-      id: id,
-      title: 'Senior Frontend Developer (React)',
-      companyName: 'TechFlow Systems',
-      companyLogo: '', 
-      location: 'Ahmedabad, Gujarat (Remote)',
-      salary: '₹12L - ₹18L per year',
-      experience: '3-5 Years',
-      jobType: 'Full-time',
-      postedAt: '2 days ago',
-      applications: 142,
-      description: `
-        ### About the Role
-        We are looking for a passionate Senior Frontend Developer to join our growing team. You will be responsible for building high-quality, scalable web applications using React.js and modern frontend technologies.
+  const job = useMemo(() => jobs.find(j => String(j.id) === String(id)), [jobs, id]);
 
-        ### Responsibilities
-        - Develop new user-facing features using React.js
-        - Build reusable components and frontend libraries for future use
-        - Optimize applications for maximum speed and scalability
-        - Collaborate with back-end developers and web designers to improve usability
-        - Ensure high quality graphic standards and brand consistency
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center">
+        <div className="w-10 h-10 border-4 border-teal-500 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
-        ### Requirements
-        - 3+ years of professional experience with React.js
-        - Proficiency in JavaScript, including DOM manipulation and the JavaScript object model
-        - Experience with state management libraries like Redux or Context API
-        - Knowledge of modern authorization mechanisms, such as JSON Web Token
-        - Familiarity with modern frontend build pipelines and tools
-        - Ability to understand business requirements and translate them into technical requirements
-      `,
-      skills: ['React', 'JavaScript', 'TypeScript', 'Redux', 'Tailwind CSS'],
-      benefits: ['Remote Work', 'Health Insurance', 'Flexible Hours', 'Learning Stipend'],
-      companyInfo: 'TechFlow Systems is a leading software solutions provider focused on building innovative digital products for global clients.'
-    };
-
-    setTimeout(() => {
-      setJob(mockJob);
-      setLoading(false);
-    }, 500);
-  }, [id]);
-
-  if (loading) return null;
+  if (!job) {
+    return (
+      <div className="min-h-screen bg-[#F8FAFC] flex flex-col">
+        {isRecruiter ? (
+          <RecruiterNavbar onMenuToggle={() => {}} />
+        ) : (
+          <UserNavbar onMenuToggle={() => {}} />
+        )}
+        <main className="flex-1 max-w-[1280px] mx-auto px-4 sm:px-6 py-16">
+          <div className="bg-white border border-slate-100 rounded-xl p-8 text-center">
+            <h2 className="text-xl font-bold text-slate-900 mb-2">Job not found</h2>
+            <p className="text-slate-500">The job you are looking for may have been removed or is unavailable.</p>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#F8FAFC]">
-      <UserNavbar onMenuToggle={() => {}} />
+      {isRecruiter ? (
+        <RecruiterNavbar onMenuToggle={() => {}} />
+      ) : (
+        <UserNavbar onMenuToggle={() => {}} />
+      )}
       
       {/* Sticky Job Header */}
       <JobDetailsHeader job={job} />

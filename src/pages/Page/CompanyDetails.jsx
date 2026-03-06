@@ -1,44 +1,24 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import UserNavbar from '../../Components/UserHomePage/UserNavbar';
 import CompanyDetailsHeader from '../../Components/Companies/CompanyDetailsHeader';
 import CompanyDetailsTabs from '../../Components/Companies/CompanyDetailsTabs';
 import CompanyDetailsSidebar from '../../Components/Companies/CompanyDetailsSidebar';
 import Footer from '../../Components/Home/Footer';
+import { RecuitersContext } from '../../Context/RecuitersContext';
 
 const CompanyDetails = () => {
   const { id } = useParams();
-  const [company, setCompany] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const { companies, loading, fetchCompanies } = useContext(RecuitersContext);
 
   useEffect(() => {
-    // Mock data fetching
-    const mockCompany = {
-      id: id,
-      name: 'SkillTech Pvt Ltd',
-      industry: 'IT & Software',
-      location: 'Ahmedabad, Gujarat',
-      rating: 4.8,
-      reviews: 124,
-      employees: '50-200',
-      founded: '2018',
-      about: 'SkillTech is a leading software development company based in Ahmedabad, Gujarat. We specialize in building custom web and mobile applications for global clients.',
-      logo: '',
-      website: 'https://skilltech.com',
-      specialties: ['Web Development', 'Mobile App Development', 'UI/UX Design', 'Cloud Computing'],
-      currentJobs: [
-        { id: 1, title: 'Senior Frontend Developer', location: 'Ahmedabad', type: 'Full-time' },
-        { id: 2, title: 'Backend Engineer (Node.js)', location: 'Remote', type: 'Full-time' }
-      ]
-    };
+    fetchCompanies();
+  }, [fetchCompanies]);
 
-    setTimeout(() => {
-      setCompany(mockCompany);
-      setLoading(false);
-    }, 500);
-  }, [id]);
+  const company = useMemo(() => companies.find(c => String(c.id) === String(id)), [companies, id]);
 
   if (loading) return null;
+  if (!company) return null;
 
   return (
     <div className="min-h-screen bg-[#F8FAFC]">

@@ -317,7 +317,7 @@ const Register = () => {
              />
         ) : registrationStep === 'recruiterDetails' ? (
              <RecruiterDetails 
-                onComplete={() => navigate('/HomePage')} 
+                onComplete={() => navigate('/recruiter-home')} 
                 authToken={authDetails.token} 
                 userId={authDetails.userId}
              />

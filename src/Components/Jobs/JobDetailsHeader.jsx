@@ -1,7 +1,11 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { Bookmark } from 'lucide-react';
+import { AuthContext } from '../../Context/AuthContext';
 
 const JobDetailsHeader = ({ job }) => {
+  const { user } = useContext(AuthContext);
+  const isRecruiter = user?.role?.toLowerCase() === 'recruiter' || user?.Role?.[0]?.toLowerCase() === 'recruiter';
+
   return (
     <div className="sticky top-16 z-40 bg-white border-b border-slate-100 shadow-sm">
       <div className="max-w-[1280px] mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
@@ -16,14 +20,17 @@ const JobDetailsHeader = ({ job }) => {
         </div>
         
         <div className="flex items-center gap-3">
-          <button className="hidden sm:flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-slate-600 hover:text-slate-900 transition-colors">
-            
-            <Bookmark className="w-4 h-4" />
-            Save Your Job
-          </button>
-          <button className="px-6 py-2 bg-teal-600 text-white text-xs font-bold rounded-lg hover:bg-teal-700 transition-all active:scale-95 shadow-sm">
-            Apply Now
-          </button>
+          {!isRecruiter && (
+            <>
+              <button className="hidden sm:flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-slate-600 hover:text-slate-900 transition-colors">
+                <Bookmark className="w-4 h-4" />
+                Save Your Job
+              </button>
+              <button className="px-6 py-2 bg-teal-600 text-white text-xs font-bold rounded-lg hover:bg-teal-700 transition-all active:scale-95 shadow-sm">
+                Apply Now
+              </button>
+            </>
+          )}
         </div>
       </div>
     </div>

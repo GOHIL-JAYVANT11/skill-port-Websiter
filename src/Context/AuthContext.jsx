@@ -1,6 +1,8 @@
-import React, { createContext, useState, useCallback, useEffect, useRef } from 'react';
+import React, { createContext, useState, useCallback, useEffect, useRef, useContext } from 'react';
 
 export const AuthContext = createContext();
+
+export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
@@ -51,7 +53,11 @@ export const AuthProvider = ({ children }) => {
       if (response.ok) {
         const data = await response.json();
         if (isRecruiter) {
-          setUser(data.data || data.recruiter || data.user || data);
+          const profileData = data.data || data.recruiter || data.user || data;
+          setUser({
+            ...profileData,
+            role: profileData.role || profileData.Role || 'recruiter'
+          });
         } else {
           if (data.data?.user) {
             const rawUser = data.data.user;
@@ -133,11 +139,14 @@ export const AuthProvider = ({ children }) => {
       }
 
       const data = await response.json();
+      
+      const extractedRole = Array.isArray(data.Role) ? data.Role[0] : (data.Role || data.role || 'seeker');
+      
       const userObj = data.user || {
         _id: data.userId,
         Fullname: data.name || 'User',
         number: data.number || '',
-        role: data.role || 'seeker'
+        role: extractedRole
       };
       
       setToken(data.token);
@@ -148,9 +157,8 @@ export const AuthProvider = ({ children }) => {
       if (userObj._id) setCookie('userId', userObj._id);
       if (userObj.Fullname) setCookie('name', userObj.Fullname);
       if (userObj.number) setCookie('number', userObj.number);
-      const roleValueLogin = Array.isArray(data.Role) ? data.Role[0] : (data.Role );
-      if (roleValueLogin) {
-        setCookie('Role', roleValueLogin);
+      if (extractedRole) {
+        setCookie('Role', extractedRole);
       }
       
       return data;
@@ -179,11 +187,14 @@ export const AuthProvider = ({ children }) => {
       }
 
       const data = await response.json();
+      
+      const extractedRole = Array.isArray(data.Role) ? data.Role[0] : (data.Role || data.role || 'seeker');
+      
       const userObj = data.user || {
         _id: data.userId,
         Fullname: data.name || 'User',
         number: data.number || '',
-        role: data.role || 'seeker'
+        role: extractedRole
       };
       
       setToken(data.token);
@@ -194,9 +205,8 @@ export const AuthProvider = ({ children }) => {
       if (userObj._id) setCookie('userId', userObj._id);
       if (userObj.Fullname) setCookie('name', userObj.Fullname);
       if (userObj.number) setCookie('number', userObj.number);
-      const roleValueGoogle = Array.isArray(data.Role) ? data.Role[0] : (data.Role || data.role || userObj.role);
-      if (roleValueGoogle) {
-        setCookie('Role', roleValueGoogle);
+      if (extractedRole) {
+        setCookie('Role', extractedRole);
       }
       
       return data;

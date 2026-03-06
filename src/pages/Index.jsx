@@ -2,6 +2,7 @@ import { useContext } from 'react';
 import { Helmet } from 'react-helmet-async';
 import HomePage from './Page/HomePage';
 import UserHomePage from './Page/UserHomePage';
+import RecuitersHomePage from './Recuiters/RecuitersHomePage';
 import { AuthContext } from '../Context/AuthContext';
 
 
@@ -43,7 +44,22 @@ const Index = () => {
       
       <div className="min-h-screen bg-background">
         <main>
-          {user && user.role === 'seeker' ? <UserHomePage /> : <HomePage />}
+          {user ? (
+            (() => {
+              const role = user.role || user.Role || '';
+              const roleStr = (Array.isArray(role) ? role[0] : role).toLowerCase();
+              
+              if (roleStr === 'seeker') {
+                return <UserHomePage />;
+              } else if (roleStr === 'recruiter') {
+                return <RecuitersHomePage />;
+              } else {
+                return <HomePage />;
+              }
+            })()
+          ) : (
+            <HomePage />
+          )}
         </main>
       </div>
     </>

@@ -1,13 +1,43 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { MapPin, Briefcase, IndianRupee, Bookmark, Star, EyeOff, FileText } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { AuthContext } from '../../Context/AuthContext';
+import { toast } from 'sonner';
 
 const JobCard = ({ job, isLoggedIn }) => {
   const navigate = useNavigate();
+  const { token } = useContext(AuthContext);
 
   const handleCardClick = (e) => {
     if (e.target.closest('.action-button')) return;
     navigate(`/jobs/${job.id}`);
+  };
+
+  const handleSaveJob = async (e) => {
+    e.stopPropagation(); // Prevent card navigation
+    if (!token) {
+      toast.error('Please login to save jobs');
+      return;
+    }
+
+    try {
+      const response = await fetch(`http://localhost:4518/gknbvg/SkillPort-user/ertqyuiok/save-job/${job.id}`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        toast.success(data.message || 'Job saved successfully');
+      } else {
+        toast.error(data.message || 'Failed to save job');
+      }
+    } catch (error) {
+      console.error('Error saving job:', error);
+      toast.error('An error occurred while saving the job');
+    }
   };
 
   return (
@@ -29,11 +59,7 @@ const JobCard = ({ job, isLoggedIn }) => {
               </h3>
               <div className="flex items-center gap-2">
                 <p className="text-sm font-semibold text-slate-700">{job.companyName}</p>
-                <div className="flex items-center gap-1 text-xs font-bold text-slate-400">
-                  <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
-                  <span>{job.companyRating || '4.0'}</span>
-                  <span className="font-medium">| 100+ Reviews</span>
-                </div>
+                
               </div>
             </div>
             
@@ -93,7 +119,10 @@ const JobCard = ({ job, isLoggedIn }) => {
                 <EyeOff className="w-4 h-4" />
                 Hide
               </button>
-              <button className="action-button flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-teal-600 transition-colors">
+              <button 
+                onClick={handleSaveJob}
+                className="action-button flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-teal-600 transition-colors"
+              >
                 <Bookmark className="w-4 h-4" />
                 Save
               </button>

@@ -17,9 +17,13 @@ const CompanyDetailsTabs = ({ company }) => {
         </h3>
         <div className="bg-white rounded-2xl p-6 sm:p-8 border border-slate-100 shadow-sm">
           <p className="text-slate-600 leading-relaxed text-sm sm:text-base">
-            SkillTech is a skill-driven IT company focused on AI recruitment solutions and next-generation talent management systems. We bridge the gap between academic learning and industry requirements through our innovative platform. Our mission is to democratize career opportunities by focusing on verifiable skills rather than traditional credentials.
+            {company.description || 'No description available.'}
           </p>
-          <button className="mt-4 text-teal-600 text-sm font-bold hover:underline">Read More</button>
+          {company.website && (
+            <a href={company.website} target="_blank" rel="noreferrer" className="mt-4 inline-block text-teal-600 text-sm font-bold hover:underline">
+              Visit Website <ExternalLink className="inline w-4 h-4 ml-1" />
+            </a>
+          )}
         </div>
       </section>
 
@@ -133,13 +137,17 @@ const CompanyDetailsTabs = ({ company }) => {
         <div className="space-y-4">
           <h4 className="text-sm font-bold text-slate-400 uppercase tracking-widest">Contact Info</h4>
           <div className="space-y-3">
-            <div className="flex items-center gap-3 text-slate-600">
-              <Globe className="w-4 h-4 text-teal-600" />
-              <a href="#" className="text-sm font-semibold hover:text-teal-600 transition-colors">www.skilltech.com</a>
-            </div>
+            {company.website && (
+              <div className="flex items-center gap-3 text-slate-600">
+                <Globe className="w-4 h-4 text-teal-600" />
+                <a href={company.website} target="_blank" rel="noreferrer" className="text-sm font-semibold hover:text-teal-600 transition-colors">
+                  {company.website}
+                </a>
+              </div>
+            )}
             <div className="flex items-center gap-3 text-slate-600">
               <MapPin className="w-4 h-4 text-teal-600" />
-              <span className="text-sm font-semibold">Ahmedabad, Gujarat (HQ)</span>
+              <span className="text-sm font-semibold">{company.location}</span>
             </div>
           </div>
         </div>
@@ -153,7 +161,7 @@ const CompanyDetailsTabs = ({ company }) => {
             </div>
             <div>
               <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">Team Size</p>
-              <p className="text-sm font-bold text-slate-900">51-200 Employees</p>
+              <p className="text-sm font-bold text-slate-900">{company.size || '—'}</p>
             </div>
           </div>
         </div>
@@ -162,18 +170,28 @@ const CompanyDetailsTabs = ({ company }) => {
       <div className="space-y-4 pt-4 border-t border-slate-50">
         <h4 className="text-sm font-bold text-slate-400 uppercase tracking-widest">Mission & Vision</h4>
         <p className="text-sm text-slate-600 leading-relaxed font-medium">
-          Our mission is to empower every professional to realize their potential through skill-based hiring. We envision a world where talent is recognized by what they can do, not just where they studied.
+          {company.description || '—'}
         </p>
       </div>
 
       <div className="space-y-4 pt-4 border-t border-slate-50">
         <h4 className="text-sm font-bold text-slate-400 uppercase tracking-widest">Follow Us</h4>
         <div className="flex items-center gap-4">
-          {[Linkedin, Twitter, Facebook].map((Icon, idx) => (
-            <a key={idx} href="#" className="p-3 bg-slate-50 text-slate-400 hover:text-teal-600 hover:bg-teal-50 rounded-xl transition-all">
-              <Icon className="w-5 h-5" />
+          {company.socialLinks?.linkedIn && (
+            <a href={company.socialLinks.linkedIn} target="_blank" rel="noreferrer" className="p-3 bg-slate-50 text-slate-400 hover:text-teal-600 hover:bg-teal-50 rounded-xl transition-all">
+              <Linkedin className="w-5 h-5" />
             </a>
-          ))}
+          )}
+          {company.socialLinks?.twitter && (
+            <a href={company.socialLinks.twitter} target="_blank" rel="noreferrer" className="p-3 bg-slate-50 text-slate-400 hover:text-teal-600 hover:bg-teal-50 rounded-xl transition-all">
+              <Twitter className="w-5 h-5" />
+            </a>
+          )}
+          {company.socialLinks?.facebook && (
+            <a href={company.socialLinks.facebook} target="_blank" rel="noreferrer" className="p-3 bg-slate-50 text-slate-400 hover:text-teal-600 hover:bg-teal-50 rounded-xl transition-all">
+              <Facebook className="w-5 h-5" />
+            </a>
+          )}
         </div>
       </div>
     </div>

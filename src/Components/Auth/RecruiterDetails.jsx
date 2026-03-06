@@ -82,7 +82,7 @@ export const RecruiterDetails = ({ onComplete, authToken, userId }) => {
         });
 
         if (onComplete) onComplete();
-        navigate('/HomePage'); 
+        navigate('/recruiter-home'); 
       } else {
         const errorData = await response.json();
         toast.error('Failed to save details', {

@@ -1,7 +1,6 @@
  import React, { useContext, useEffect, useState, useRef } from 'react';
 import { AuthContext } from '../../Context/AuthContext';
-import UserNavbar from '../../Components/UserHomePage/UserNavbar';
-import Footer from '../../Components/Home/Footer';
+import UserLayout from '../../Components/Layout/UserLayout';
 import ProfileHeader from '../../Components/Profile/ProfileHeader';
 import QuickLinks from '../../Components/Profile/QuickLinks';
 import ProfileSections from '../../Components/Profile/ProfileSections';
@@ -25,7 +24,7 @@ const Profile = () => {
 
   const handleUpdateProfile = async (formData) => {
     try {
-      const response = await fetch('http://localhost:4518/api/auth/update-profile', {
+      const response = await fetch('http://localhost:4518/gknbvg/SkillPort-user/ertqyuiok/update-profile', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -64,31 +63,27 @@ const Profile = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC]">
-      <UserNavbar onMenuToggle={() => {}} />
-      
-      <main className="pt-24 pb-12 max-w-[1280px] mx-auto px-4 sm:px-6">
-        <div className="space-y-8">
-          {/* Top Profile Header */}
-          <ProfileHeader 
-            user={user} 
-            completion={68} 
-            onEditClick={() => setIsEditModalOpen(true)} 
-          />
+    <UserLayout>
+      <div className="space-y-8">
+        {/* Top Profile Header */}
+        <ProfileHeader 
+          user={user} 
+          completion={68} 
+          onEditClick={() => setIsEditModalOpen(true)} 
+        />
 
-          <div className="flex flex-col lg:flex-row gap-8 items-start">
-            {/* Left Sidebar - Quick Links */}
-            <aside className="hidden lg:block lg:w-[280px] shrink-0 sticky top-24 self-start">
-              <QuickLinks />
-            </aside>
+        <div className="flex flex-col lg:flex-row gap-8 items-start">
+          {/* Left Sidebar - Quick Links */}
+          <aside className="hidden lg:block lg:w-[280px] shrink-0 sticky top-24 self-start">
+            <QuickLinks />
+          </aside>
 
-            {/* Main Profile Sections */}
-            <div className="flex-1 w-full">
-              <ProfileSections user={user} onUpdateProfile={handleUpdateProfile} />
-            </div>
+          {/* Main Profile Sections */}
+          <div className="flex-1 w-full">
+            <ProfileSections user={user} onUpdateProfile={handleUpdateProfile} />
           </div>
         </div>
-      </main>
+      </div>
 
       <EditProfileModal 
         isOpen={isEditModalOpen} 
@@ -96,9 +91,7 @@ const Profile = () => {
         user={user}
         onSave={handleUpdateProfile}
       />
-
-      <Footer />
-    </div>
+    </UserLayout>
   );
 };
 
