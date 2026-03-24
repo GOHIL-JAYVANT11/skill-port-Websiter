@@ -5,9 +5,12 @@ export const JobContext = createContext();
 
 export const JobProvider = ({ children }) => {
   const [jobs, setJobs] = useState([]);
+  const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [applicationsLoading, setApplicationsLoading] = useState(false);
   const [error, setError] = useState(null);
-  const { token } = useContext(AuthContext);
+  const [applicationsError, setApplicationsError] = useState(null);
+  const { token, user } = useContext(AuthContext);
 
   const fetchData = async () => {
     if (!token) {
@@ -84,6 +87,7 @@ export const JobProvider = ({ children }) => {
             benefits,
             matchPercentage: 95,
             companyAbout: '',
+            recId: job.recId?._id || job.recId || '',
             isNew: new Date(job.createdAt) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
           };
         });
@@ -99,12 +103,58 @@ export const JobProvider = ({ children }) => {
     }
   };
 
+  const fetchJobApplications = async () => {
+    if (!token || !user?._id) return;
+
+    setApplicationsLoading(true);
+    try {
+      // Trying common recruiter endpoints if get-job-applications fails
+      const response = await fetch(`http://localhost:4518/gknbvg/SkillPort-recruiter/ertqyuiok/get-recruiter-jobs?userId=${user._id}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      const text = await response.text();
+      let data;
+      try {
+        data = JSON.parse(text);
+      } catch (e) {
+        console.error('Failed to parse JSON from response:', text.substring(0, 100));
+        throw new Error('Invalid JSON response from server');
+      }
+
+      if (response.ok && data.success) {
+        setApplications(data.data || []);
+      } else {
+        setApplicationsError(data.message || 'Failed to fetch applications');
+      }
+    } catch (err) {
+      console.error('Error fetching job applications:', err);
+      setApplicationsError(err.message);
+    } finally {
+      setApplicationsLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchData();
-  }, [token]);
+    if (user && (user.role === 'Recruiter' || user.Role === 'Recruiter' || (Array.isArray(user.role) && user.role[0] === 'Recruiter'))) {
+      fetchJobApplications();
+    }
+  }, [token, user]);
 
   return (
-    <JobContext.Provider value={{ jobs, loading, error, fetchJobs: fetchData }}>
+    <JobContext.Provider value={{ 
+      jobs, 
+      loading, 
+      error, 
+      fetchJobs: fetchData,
+      applications,
+      applicationsLoading,
+      applicationsError,
+      fetchJobApplications
+    }}>
       {children}
     </JobContext.Provider>
   );

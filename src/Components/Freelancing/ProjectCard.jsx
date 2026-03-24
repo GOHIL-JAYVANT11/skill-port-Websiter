@@ -6,7 +6,10 @@ const ProjectCard = ({ project }) => {
   const navigate = useNavigate();
 
   return (
-    <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 hover:shadow-md hover:border-teal-100 transition-all duration-300 group cursor-pointer relative overflow-hidden">
+    <div 
+      onClick={() => navigate(`/freelance/${project._id}`)}
+      className="bg-white rounded-[2.5rem] p-8 shadow-sm border border-slate-100 hover:shadow-xl hover:shadow-teal-500/5 hover:border-teal-100 transition-all duration-500 group cursor-pointer relative overflow-hidden" 
+    >
       {/* AI Match Badge */}
       {project.matchPercentage && project.matchPercentage >= 70 && (
         <div className="absolute top-4 right-4 flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-700 rounded-full text-xs font-bold border border-emerald-100 animate-pulse">
@@ -29,7 +32,11 @@ const ProjectCard = ({ project }) => {
               <IndianRupee className="w-4 h-4 text-teal-600" />
             </div>
             <div>
-              <p className="text-xs font-bold text-slate-900">{project.budget}</p>
+              <p className="text-xs font-bold text-slate-900">
+                {typeof project.budget === 'object' 
+                  ? `₹${project.budget.min} - ₹${project.budget.max}` 
+                  : project.budget}
+              </p>
               <p className="text-[10px] text-slate-400 font-medium">Budget</p>
             </div>
           </div>
@@ -54,12 +61,12 @@ const ProjectCard = ({ project }) => {
         </div>
 
         <div className="flex flex-wrap gap-2 mb-6">
-          {project.skills.map((skill, index) => (
+          {(project.skills || project.skillsRequired || []).map((skill, index) => (
             <span 
               key={index} 
               className="px-3 py-1 bg-slate-50 text-slate-600 text-[11px] font-bold rounded-lg border border-slate-100"
             >
-              {skill}
+              {typeof skill === 'string' ? skill.replace(/[.,]/g, '').trim() : skill}
             </span>
           ))}
         </div>

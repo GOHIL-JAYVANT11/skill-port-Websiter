@@ -128,10 +128,7 @@ const RecruiterNavbar = ({ onMenuToggle }) => {
                   <User className="w-4 h-4" />
                   <span>Company Profile</span>
                 </Link>
-                <button className="w-full px-4 py-2 flex items-center gap-3 text-sm text-slate-600 hover:bg-slate-50 hover:text-teal-600 transition-colors">
-                  <Settings className="w-4 h-4" />
-                  <span>Account Settings</span>
-                </button>
+                
                 <button className="w-full px-4 py-2 flex items-center gap-3 text-sm text-slate-600 hover:bg-slate-50 hover:text-teal-600 transition-colors">
                   <CreditCard className="w-4 h-4" />
                   <span>Billing & Subscription</span>

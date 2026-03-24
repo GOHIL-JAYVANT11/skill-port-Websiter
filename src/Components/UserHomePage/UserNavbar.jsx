@@ -68,14 +68,11 @@ const UserNavbar = ({ onMenuToggle }) => {
 
         {/* Icons */}
         <div className="flex items-center gap-1 md:gap-2">
-          <button className="p-2 text-slate-500 hover:bg-slate-100 rounded-full transition-colors relative">
+          <Link to="/notifications" className="p-2 text-slate-500 hover:bg-slate-100 rounded-full transition-colors relative">
             <Bell className="w-5 h-5" />
             <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white" />
-          </button>
-          <button className="hidden sm:flex p-2 text-slate-500 hover:bg-slate-100 rounded-full transition-colors relative">
-            <MessageSquare className="w-5 h-5" />
-            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-teal-500 rounded-full border-2 border-white" />
-          </button>
+          </Link>
+          
         </div>
 
         {/* Profile Dropdown */}
@@ -136,21 +133,14 @@ const UserNavbar = ({ onMenuToggle }) => {
                     <span className="font-medium">View & Update Profile</span>
                   </Link>
                   <Link 
-                    to="/job-postings" 
+                    to="/register" 
                     className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-50 hover:text-teal-600 transition-colors"
                     onClick={() => setIsProfileOpen(false)}
                   >
                     <Briefcase className="w-4 h-4" />
                     <span className="font-medium">Job Postings Account</span>
                   </Link>
-                  <Link 
-                    to="/settings" 
-                    className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-50 hover:text-teal-600 transition-colors"
-                    onClick={() => setIsProfileOpen(false)}
-                  >
-                    <Settings className="w-4 h-4" />
-                    <span className="font-medium">Settings</span>
-                  </Link>
+                 
                 </div>
                 
                 <div className="mt-1 pt-1 border-t border-slate-50">

@@ -91,7 +91,7 @@ const ApplicationCard = ({ application, onViewProfile }) => {
             <div className="flex items-start gap-2 mb-5 p-3 bg-slate-50/50 rounded-2xl border border-slate-50">
               <FileText className="w-3.5 h-3.5 text-slate-400 shrink-0 mt-0.5" />
               <p className="text-[11px] text-slate-500 font-medium line-clamp-1 leading-relaxed italic">
-                {application.skills.join(', ')} • {application.education}
+                {(application.skills || []).join(', ')} • {application.education || 'No education info'}
               </p>
             </div>
 

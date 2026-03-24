@@ -1,5 +1,7 @@
 // API Base URL
 export const API_BASE_URL = 'http://localhost:4518/gknbvg/SkillPort-user';
+export const RECRUITER_API_BASE_URL = 'http://localhost:4518/gknbvg/SkillPort-recruiter/ertqyuiok';
+export const PAYMENT_API_BASE_URL = 'http://localhost:4518/api/payments';
 
 // Auth Endpoints
 export const AUTH_ENDPOINTS = {

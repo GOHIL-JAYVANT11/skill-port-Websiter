@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext, useMemo } from 'react';
 import { Inbox, Eye, Star, CalendarClock, XCircle } from 'lucide-react';
+import { JobContext } from '../../Context/JobContext';
 
 const SummaryCard = ({ label, value, icon: Icon, color, delay }) => {
   const [displayValue, setDisplayValue] = useState(0);
@@ -42,13 +43,23 @@ const SummaryCard = ({ label, value, icon: Icon, color, delay }) => {
 };
 
 const ApplicationsSummaryCards = () => {
-  const stats = [
-    { label: 'Total Applications', value: 248, icon: Inbox, color: 'bg-teal-500', delay: 100 },
-    { label: 'Under Review', value: 64, icon: Eye, color: 'bg-amber-500', delay: 150 },
-    { label: 'Shortlisted', value: 32, icon: Star, color: 'bg-sky-500', delay: 200 },
-    { label: 'Interview Scheduled', value: 18, icon: CalendarClock, color: 'bg-indigo-500', delay: 250 },
-    { label: 'Rejected', value: 21, icon: XCircle, color: 'bg-slate-500', delay: 300 },
-  ];
+  const { applications } = useContext(JobContext);
+
+  const stats = useMemo(() => {
+    const total = applications?.length || 0;
+    const underReview = applications?.filter(app => app.status === 'Under Review').length || 0;
+    const shortlisted = applications?.filter(app => app.status === 'Shortlisted').length || 0;
+    const interview = applications?.filter(app => app.status === 'Interview Scheduled').length || 0;
+    const rejected = applications?.filter(app => app.status === 'Rejected').length || 0;
+
+    return [
+      { label: 'Total Applications', value: total, icon: Inbox, color: 'bg-teal-500', delay: 100 },
+      { label: 'Under Review', value: underReview, icon: Eye, color: 'bg-amber-500', delay: 150 },
+      { label: 'Shortlisted', value: shortlisted, icon: Star, color: 'bg-sky-500', delay: 200 },
+      { label: 'Interview Scheduled', value: interview, icon: CalendarClock, color: 'bg-indigo-500', delay: 250 },
+      { label: 'Rejected', value: rejected, icon: XCircle, color: 'bg-slate-500', delay: 300 },
+    ];
+  }, [applications]);
 
   return (
     <section className="mb-8">

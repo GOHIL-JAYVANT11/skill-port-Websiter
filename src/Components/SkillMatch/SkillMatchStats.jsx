@@ -1,13 +1,36 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Users, Zap, BarChart3, PieChart } from 'lucide-react';
 
-const SkillMatchStats = () => {
+const SkillMatchStats = ({ matchData = [] }) => {
+  const statsSummary = useMemo(() => {
+    let total = 0;
+    let high = 0;
+    let medium = 0;
+    let low = 0;
+
+    matchData.forEach(jobGroup => {
+      jobGroup.applications.forEach(app => {
+        total++;
+        if (app.matchScore >= 90) high++;
+        else if (app.matchScore >= 70) medium++;
+        else low++;
+      });
+    });
+
+    return { total, high, medium, low };
+  }, [matchData]);
+
   const stats = [
-    { label: 'Total Matched', value: 450, color: 'text-slate-900', bg: 'bg-slate-100' },
-    { label: 'High Match (>90%)', value: 124, color: 'text-emerald-600', bg: 'bg-emerald-50' },
-    { label: 'Medium Match (70-89%)', value: 215, color: 'text-teal-600', bg: 'bg-teal-50' },
-    { label: 'Low Match (<70%)', value: 111, color: 'text-slate-400', bg: 'bg-slate-50' },
+    { label: 'Total Matched', value: statsSummary.total, color: 'text-slate-900', bg: 'bg-slate-100' },
+    { label: 'High Match (>90%)', value: statsSummary.high, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+    { label: 'Medium Match (70-89%)', value: statsSummary.medium, color: 'text-teal-600', bg: 'bg-teal-50' },
+    { label: 'Low Match (<70%)', value: statsSummary.low, color: 'text-slate-400', bg: 'bg-slate-50' },
   ];
+
+  // Calculate Dash Offset for Circle
+  const dashArray = 439.82;
+  const highOffset = dashArray - (dashArray * (statsSummary.high / (statsSummary.total || 1)));
+  const mediumOffset = dashArray - (dashArray * ((statsSummary.high + statsSummary.medium) / (statsSummary.total || 1)));
 
   return (
     <div className="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 mb-8">
@@ -18,14 +41,14 @@ const SkillMatchStats = () => {
             {/* Background Circle */}
             <circle cx="80" cy="80" r="70" stroke="currentColor" strokeWidth="12" fill="transparent" className="text-slate-50" />
             {/* Low Match */}
-            <circle cx="80" cy="80" r="70" stroke="currentColor" strokeWidth="12" fill="transparent" strokeDasharray="439.82" strokeDashoffset="0" strokeLinecap="round" className="text-slate-200" />
+            <circle cx="80" cy="80" r="70" stroke="currentColor" strokeWidth="12" fill="transparent" strokeDasharray={dashArray} strokeDashoffset="0" strokeLinecap="round" className="text-slate-200" />
             {/* Medium Match */}
-            <circle cx="80" cy="80" r="70" stroke="currentColor" strokeWidth="12" fill="transparent" strokeDasharray="439.82" strokeDashoffset="131.94" strokeLinecap="round" className="text-teal-500" />
+            <circle cx="80" cy="80" r="70" stroke="currentColor" strokeWidth="12" fill="transparent" strokeDasharray={dashArray} strokeDashoffset={mediumOffset} strokeLinecap="round" className="text-teal-500" />
             {/* High Match */}
-            <circle cx="80" cy="80" r="70" stroke="currentColor" strokeWidth="12" fill="transparent" strokeDasharray="439.82" strokeDashoffset="307.87" strokeLinecap="round" className="text-emerald-500" />
+            <circle cx="80" cy="80" r="70" stroke="currentColor" strokeWidth="12" fill="transparent" strokeDasharray={dashArray} strokeDashoffset={highOffset} strokeLinecap="round" className="text-emerald-500" />
           </svg>
           <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <span className="text-2xl font-black text-slate-900 leading-none">450</span>
+            <span className="text-2xl font-black text-slate-900 leading-none">{statsSummary.total}</span>
             <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest mt-1">Total</span>
           </div>
         </div>

@@ -1,58 +1,61 @@
-import React from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import ProjectCard from './ProjectCard';
+import { AuthContext } from '../../Context/AuthContext';
+import { Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
+import ErrorBoundary from '../Common/ErrorBoundary';
 
 const FreelancingListing = () => {
-  // Mock data for freelance projects
-  const projects = [
-    {
-      id: 1,
-      title: 'Build React Admin Dashboard',
-      clientName: 'SkillTech Pvt Ltd',
-      budget: '₹45,000 – ₹60,000',
-      duration: '2 Months',
-      experience: 'Intermediate',
-      skills: ['React', 'Tailwind', 'Node.js', 'PostgreSQL'],
-      proposalsCount: 14,
-      matchPercentage: 92,
-      postedTime: '2 hrs ago'
-    },
-    {
-      id: 2,
-      title: 'E-commerce Mobile App (Flutter)',
-      clientName: 'Innovate Solutions',
-      budget: '₹80,000 – ₹1,20,000',
-      duration: '3 Months',
-      experience: 'Expert',
-      skills: ['Flutter', 'Firebase', 'Dart', 'REST API'],
-      proposalsCount: 8,
-      matchPercentage: 85,
-      postedTime: '5 hrs ago'
-    },
-    {
-      id: 3,
-      title: 'Landing Page SEO Optimization',
-      clientName: 'Growth hackers',
-      budget: '₹15,000 – ₹25,000',
-      duration: '2 Weeks',
-      experience: 'Beginner',
-      skills: ['SEO', 'Google Analytics', 'Content Writing'],
-      proposalsCount: 22,
-      matchPercentage: 78,
-      postedTime: '1 day ago'
-    },
-    {
-      id: 4,
-      title: 'AI Chatbot Integration',
-      clientName: 'Nexus AI',
-      budget: '₹50,000 – ₹75,000',
-      duration: '1 Month',
-      experience: 'Intermediate',
-      skills: ['Python', 'OpenAI API', 'React'],
-      proposalsCount: 5,
-      matchPercentage: 88,
-      postedTime: '3 hrs ago'
+  const { token, user } = useContext(AuthContext);
+  const [projects, setProjects] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedProject, setSelectedProject] = useState(null);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+
+  useEffect(() => {
+    if (token) {
+      fetchProjects();
+    } else {
+      setLoading(false);
     }
-  ];
+  }, [token]);
+
+  const fetchProjects = async () => {
+    try {
+      // Corrected to the recruiter namespace where the endpoint is located
+      const response = await fetch('http://localhost:4518/gknbvg/SkillPort-recruiter/ertqyuiok/get-all-freelance-projects', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      const text = await response.text();
+      let data;
+      try {
+        data = JSON.parse(text);
+      } catch (e) {
+        console.error('Failed to parse response as JSON:', text.substring(0, 100));
+        throw new Error('Invalid JSON response from server');
+      }
+
+      if (response.ok && data.success) {
+        setProjects(data.data || []);
+      } else {
+        toast.error(data.message || 'Failed to load projects');
+      }
+    } catch (error) {
+      console.error('Error fetching projects:', error);
+      toast.error('An error occurred while fetching projects');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCardClick = (project) => {
+    setSelectedProject(project);
+    setIsDrawerOpen(true);
+  };
 
   return (
     <div className="w-full">
@@ -63,11 +66,27 @@ const FreelancingListing = () => {
       </div>
 
       {/* Projects List */}
-      <div className="space-y-6">
-        {projects.map((project) => (
-          <ProjectCard key={project.id} project={project} />
-        ))}
-      </div>
+      {loading ? (
+        <div className="flex flex-col items-center justify-center py-20 gap-4">
+          <Loader2 className="w-10 h-10 text-teal-500 animate-spin" />
+          <p className="text-slate-400 font-bold">Loading opportunities...</p>
+        </div>
+      ) : projects.length > 0 ? (
+        <div className="space-y-6">
+          {projects.map((project) => (
+            <ErrorBoundary key={project._id}>
+              <ProjectCard 
+                project={project} 
+                onClick={handleCardClick}
+              />
+            </ErrorBoundary>
+          ))}
+        </div>
+      ) : (
+        <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-slate-200">
+          <p className="text-slate-400 font-medium">No freelance projects found at the moment.</p>
+        </div>
+      )}
     </div>
   );
 };

@@ -14,7 +14,15 @@ import RecruiterProfile from "./pages/Recuiters/Profile";
 import ManageJob from "./pages/Recuiters/ManageJob";
 import Candidates from "./pages/Recuiters/Candidates";
 import SkillMatch from "./pages/Recuiters/SkillMatch";
+import MeetingRoom from "./pages/Recuiters/MeetingRoom";
+import RecuiterInterviewpage from "./pages/Recuiters/RecuiterInterviewpage";
 import Application from "./pages/Recuiters/Application";
+import Proposal from "./pages/Recuiters/Proposal";
+import ShortListProposals from "./pages/Recuiters/ShortListProposals";
+import BillingANDPayments from "./pages/Recuiters/BillingANDPayments";
+import FreelancingPost from "./pages/Recuiters/FreelancingPost";
+import ManageFreelnacing from "./pages/Recuiters/ManageFreelnacing";
+import FreelancingPostDetials from "./pages/Recuiters/FreelancingPostDetials";
 import Jobs from "./pages/Page/Jobs";
 import JobDetails from "./pages/Page/JobDetails";
 import Companies from "./pages/Page/Companies";
@@ -26,9 +34,11 @@ import Profile from "./pages/Page/Profile";
 import MyApplication from "./pages/Page/MyApplication";
 import Interview from "./pages/Page/Interview";
 import SaveData from "./pages/Page/SaveData";
+import MyProposals from "./pages/Page/MyProposals";
 import NotFound from "./pages/NotFound";
 import Login from "./Components/Auth/Login";
 import Register from "./Components/Auth/Register";
+import ApplyJobs from "./pages/Page/ApplyJobs";
 
 
 const queryClient = new QueryClient();
@@ -47,15 +57,24 @@ const App = () => (
                   <Route path="/user-home" element={<UserHomePage />} />
                   <Route path="/recruiter-home" element={<RecuitersHomePage />} />
                   <Route path="/recruiter/post-job" element={<JobPost />} />
+                  <Route path="/recruiter/post-freelance" element={<FreelancingPost />} />
+                  <Route path="/recruiter/manage-freelance" element={<ManageFreelnacing />} />
+                  <Route path="/recruiter/manage-freelance/:projectId" element={<FreelancingPostDetials />} />
                   <Route path="/recruiter/profile" element={<RecruiterProfile />} />
                   <Route path="/manage-jobs" element={<ManageJob />} />
                   <Route path="/candidates" element={<Candidates />} />
                   <Route path="/skill-matches" element={<SkillMatch />} />
+                  <Route path="/meet/:roomCode" element={<MeetingRoom />} />
+                  <Route path="/recruiter-interviews" element={<RecuiterInterviewpage />} />
                   <Route path="/applications" element={<Application />} />
+                  <Route path="/proposals" element={<Proposal />} />
+                  <Route path="/shortlisted-proposals" element={<ShortListProposals />} />
+                  <Route path="/recruiter/billing" element={<BillingANDPayments />} />
                   <Route path="/login" element={<Login />} />
                   <Route path="/register" element={<Register />} />
                   <Route path="/jobs" element={<Jobs />} />
                   <Route path="/jobs/:id" element={<JobDetails />} />
+                  <Route path="/jobs/:jobId/apply" element={<ApplyJobs />} />
                   <Route path="/companies" element={<Companies />} />
                   <Route path="/companies/:id" element={<CompanyDetails />} />
                   <Route path="/freelance" element={<Freelancing />} />
@@ -63,6 +82,7 @@ const App = () => (
                   <Route path="/notifications" element={<Notifications />} />
                   <Route path="/profile" element={<Profile />} />
                   <Route path="/my-applications" element={<MyApplication />} />
+                  <Route path="/my-proposals" element={<MyProposals />} />
                   <Route path="/interviews" element={<Interview />} />
                   <Route path="/saved-jobs" element={<SaveData />} />
                   <Route path="*" element={<NotFound />} />

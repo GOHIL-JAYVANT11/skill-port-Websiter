@@ -11,7 +11,9 @@ const MyApplication = () => {
   const [activeTab, setActiveTab] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const { user } = useContext(AuthContext);
+  const [applications, setApplications] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const { user, token } = useContext(AuthContext);
   const navigate = useNavigate();
   const isRecruiter = user?.role?.toLowerCase() === 'recruiter' || user?.Role?.[0]?.toLowerCase() === 'recruiter';
 
@@ -21,90 +23,44 @@ const MyApplication = () => {
     }
   }, [isRecruiter, navigate]);
 
-  const applications = [
-    {
-      id: 1,
-      title: 'Senior Frontend Developer',
-      company: 'TechNova Pvt Ltd',
-      logo: 'https://cdn-icons-png.flaticon.com/512/2991/2991148.png',
-      location: 'Ahmedabad, IN',
-      salary: '₹12–18 LPA',
-      experience: '3–5 Years',
-      appliedDate: '12 Feb 2026',
-      status: 'Shortlisted',
-      match: 92,
-      aiInsight: 'Matched because of React, Tailwind CSS, and Node.js skills.',
-      recruiterActivity: 'Recruiter viewed your profile 2 days ago'
-    },
-    {
-      id: 2,
-      title: 'Full Stack Engineer (React/Node)',
-      company: 'Nexus AI',
-      logo: 'https://cdn-icons-png.flaticon.com/512/5968/5968269.png',
-      location: 'Bangalore, IN',
-      salary: '₹18–25 LPA',
-      experience: '4+ Years',
-      appliedDate: '15 Feb 2026',
-      status: 'Interview',
-      match: 88,
-      aiInsight: 'Strong match for Node.js backend architecture. Add MongoDB to reach 95%.',
-      recruiterActivity: 'Hiring Manager messaged you yesterday',
-      interviewDetails: {
-        date: '26 Feb 2026',
-        time: '3:00 PM',
-        link: 'https://zoom.us/j/123456789'
+  const fetchApplications = async () => {
+    if (!token) return;
+    setLoading(true);
+    try {
+      const response = await fetch('http://localhost:4518/gknbvg/SkillPort-user/ertqyuiok/get-my-applications', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      const result = await response.json();
+      if (result.success) {
+        setApplications(result.data);
       }
-    },
-    {
-      id: 3,
-      title: 'UI/UX Designer',
-      company: 'Creative Studio',
-      logo: 'https://cdn-icons-png.flaticon.com/512/5968/5968264.png',
-      location: 'Remote',
-      salary: '₹8–12 LPA',
-      experience: '2–4 Years',
-      appliedDate: '10 Feb 2026',
-      status: 'Pending',
-      match: 75,
-      aiInsight: 'Portfolio matches brand design requirements. Complete Figma certification to boost.',
-      recruiterActivity: 'Application submitted'
-    },
-    {
-      id: 4,
-      title: 'Backend Developer',
-      company: 'SkillTech Pvt Ltd',
-      logo: 'https://cdn-icons-png.flaticon.com/512/732/732221.png',
-      location: 'Ahmedabad, IN',
-      salary: '₹10–15 LPA',
-      experience: '3+ Years',
-      appliedDate: '05 Feb 2026',
-      status: 'Rejected',
-      match: 65,
-      aiInsight: 'Missing required experience in AWS deployment and microservices.',
-      recruiterActivity: 'Decision made 1 week ago'
-    },
-    {
-      id: 5,
-      title: 'Software Engineer Intern',
-      company: 'InnoTech Solutions',
-      logo: 'https://cdn-icons-png.flaticon.com/512/732/732172.png',
-      location: 'Ahmedabad, IN',
-      salary: '₹30k/mo',
-      experience: 'Fresher',
-      appliedDate: '20 Feb 2026',
-      status: 'Hired',
-      match: 95,
-      aiInsight: 'Perfect match for academic projects and skill assessment score.',
-      recruiterActivity: 'Onboarding in progress'
+    } catch (error) {
+      console.error('Error fetching applications:', error);
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
+
+  useEffect(() => {
+    fetchApplications();
+  }, [token]);
 
   const filteredApplications = applications.filter(app => {
     const matchesTab = activeTab === 'All' || app.status === activeTab;
-    const matchesSearch = app.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                         app.company.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSearch = (app.jobtitle || '').toLowerCase().includes(searchQuery.toLowerCase());
     return matchesTab && matchesSearch;
   });
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center">
+        <div className="w-12 h-12 border-4 border-teal-500 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#F8FAFC]">
@@ -129,7 +85,7 @@ const MyApplication = () => {
             <div className="space-y-6">
               {filteredApplications.length > 0 ? (
                 filteredApplications.map((app) => (
-                  <ApplicationCard key={app.id} application={app} />
+                  <ApplicationCard key={app._id} application={app} />
                 ))
               ) : (
                 <div className="bg-white rounded-3xl p-12 border border-slate-100 shadow-sm text-center">

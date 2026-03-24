@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useContext, useMemo } from 'react';
 import { Search, SlidersHorizontal, RotateCcw } from 'lucide-react';
+import { JobContext } from '../../Context/JobContext';
 
 const statusOptions = [
   'All',
@@ -11,6 +12,20 @@ const statusOptions = [
 ];
 
 const ApplicationsFilterBar = () => {
+  const { applications } = useContext(JobContext);
+
+  const jobs = useMemo(() => {
+    if (!applications) return [];
+    const jobMap = new Map();
+    applications.forEach(app => {
+      const job = app.jobId;
+      if (job && job._id) {
+        jobMap.set(job._id, job.jobtitle);
+      }
+    });
+    return Array.from(jobMap.entries()).map(([id, title]) => ({ id, title }));
+  }, [applications]);
+
   return (
     <section className="mb-6 bg-white border border-slate-100 rounded-3xl shadow-sm p-4 sm:p-5">
       <div className="flex flex-col gap-4">
@@ -28,9 +43,9 @@ const ApplicationsFilterBar = () => {
           <div className="flex flex-1 flex-col sm:flex-row gap-3">
             <select className="flex-1 text-xs sm:text-sm bg-slate-50 border border-slate-100 rounded-2xl px-3 py-2 text-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-500/60">
               <option>All Jobs</option>
-              <option>Senior React Developer</option>
-              <option>Product Designer (UI/UX)</option>
-              <option>Backend Engineer</option>
+              {jobs.map(job => (
+                <option key={job.id} value={job.id}>{job.title}</option>
+              ))}
             </select>
 
             <select className="flex-1 text-xs sm:text-sm bg-slate-50 border border-slate-100 rounded-2xl px-3 py-2 text-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-500/60">

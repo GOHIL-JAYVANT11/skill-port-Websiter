@@ -1,7 +1,21 @@
-import React from 'react';
+import React, { useContext, useMemo } from 'react';
 import { Sparkles, Zap } from 'lucide-react';
+import { JobContext } from '../../Context/JobContext';
 
 const ApplicationsAIInsights = () => {
+  const { applications } = useContext(JobContext);
+
+  const insights = useMemo(() => {
+    const total = applications?.length || 0;
+    const highMatch = applications?.filter(app => app.has_required_skill).length || 0;
+    const pending = applications?.filter(app => app.status === 'Applied' || app.status === 'Under Review').length || 0;
+    const shortlisted = applications?.filter(app => app.status === 'Shortlisted').length || 0;
+
+    if (total === 0) return "No applications to analyze yet.";
+
+    return `${highMatch} high-match candidates · ${pending} pending review · ${shortlisted} shortlisted profiles ready`;
+  }, [applications]);
+
   return (
     <section className="mb-6">
       <div className="bg-gradient-to-r from-teal-600 via-emerald-500 to-teal-600 text-white rounded-3xl p-4 sm:p-5 shadow-md flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -14,7 +28,7 @@ const ApplicationsAIInsights = () => {
               AI Insights
             </p>
             <h3 className="text-sm sm:text-base font-black tracking-tight">
-              3 high‑match candidates are pending review · 2 shortlisted profiles are ready for interviews
+              {insights}
             </h3>
           </div>
         </div>

@@ -1,112 +1,53 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useContext } from 'react';
 import {
   ArrowUpDown,
   Download,
 } from 'lucide-react';
 import ApplicationCard from './ApplicationCard';
+import { JobContext } from '../../Context/JobContext';
 
 const ApplicationsList = ({ onViewProfile }) => {
   const [sortBy, setSortBy] = useState('Newest Application');
+  const { applications, applicationsLoading } = useContext(JobContext);
 
-  const applications = useMemo(
-    () => [
-      {
-        id: 'APP-001',
-        candidateId: 'C-1001',
-        jobId: 'JOB-2026-001',
-        candidateName: 'Alex Rivera',
-        roleTitle: 'Full Stack Engineer',
-        jobTitle: 'Senior React Developer',
-        experience: '6 Years',
-        matchScore: 96,
-        status: 'Under Review',
-        appliedDate: '2026-03-01',
-        applicationStatus: 'Under Review',
-        interviewStatus: 'Screening pending',
-        shortlistedBy: 'SkillPORT AI',
-        skills: ['React', 'Node.js', 'TypeScript', 'PostgreSQL', 'AWS'],
-        education: 'B.Tech Computer Science · Stanford University',
-        certifications: ['AWS Certified Developer', 'React Advanced'],
-        experienceTimeline: [
-          { title: 'Senior Engineer', company: 'FintechX', duration: '2 yrs' },
-          { title: 'Engineer', company: 'CloudHub', duration: '3 yrs' },
-        ],
-        rating: 5,
-      },
-      {
-        id: 'APP-002',
-        candidateId: 'C-1002',
-        jobId: 'JOB-2026-002',
-        candidateName: 'Sarah Chen',
-        roleTitle: 'Product Designer',
-        jobTitle: 'Product Designer (UI/UX)',
-        experience: '5 Years',
-        matchScore: 88,
-        status: 'Shortlisted',
-        appliedDate: '2026-02-27',
-        applicationStatus: 'Shortlisted',
-        interviewStatus: 'Portfolio review scheduled',
-        shortlistedBy: 'You',
-        skills: ['Figma', 'Design Systems', 'Prototyping', 'User Research'],
-        education: 'M.Des Interaction Design · NID',
-        certifications: ['UX Research Pro', 'Design Systems Mastery'],
-        experienceTimeline: [
-          { title: 'Product Designer', company: 'ShopWave', duration: '2 yrs' },
-          { title: 'UI Designer', company: 'Creative Labs', duration: '3 yrs' },
-        ],
-        rating: 4,
-      },
-      {
-        id: 'APP-003',
-        candidateId: 'C-1003',
-        jobId: 'JOB-2026-003',
-        candidateName: 'Marcus Johnson',
-        roleTitle: 'Backend Developer',
-        jobTitle: 'Backend Engineer',
-        experience: '4 Years',
-        matchScore: 79,
-        status: 'Interview Scheduled',
-        appliedDate: '2026-02-25',
-        applicationStatus: 'Interview Scheduled',
-        interviewStatus: 'Tech round · Mar 03',
-        shortlistedBy: 'Hiring Manager',
-        skills: ['Node.js', 'PostgreSQL', 'Docker', 'Redis'],
-        education: 'B.Sc Computer Science · NYU',
-        certifications: ['Database Performance Tuning'],
-        experienceTimeline: [
-          { title: 'Backend Developer', company: 'SaaSly', duration: '2 yrs' },
-          { title: 'Software Engineer', company: 'DataCore', duration: '2 yrs' },
-        ],
-        rating: 4,
-      },
-      {
-        id: 'APP-004',
-        candidateId: 'C-1004',
-        jobId: 'JOB-2026-001',
-        candidateName: 'Elena Rodriguez',
-        roleTitle: 'Software Engineer',
-        jobTitle: 'Senior React Developer',
-        experience: '3 Years',
-        matchScore: 68,
-        status: 'Rejected',
-        appliedDate: '2026-02-20',
-        applicationStatus: 'Rejected',
-        interviewStatus: null,
-        shortlistedBy: null,
-        skills: ['JavaScript', 'React', 'HTML', 'CSS'],
-        education: 'B.E. Information Technology · MIT',
-        certifications: ['Frontend Performance Optimization'],
-        experienceTimeline: [
-          { title: 'Frontend Engineer', company: 'MediaLoop', duration: '3 yrs' },
-        ],
-        rating: 3,
-      },
-    ],
-    [],
-  );
+  const mappedApplications = useMemo(() => {
+    if (!applications) return [];
+    return applications.map(app => ({
+      id: app._id,
+      candidateId: app.userId?._id,
+      jobId: app.jobId?._id,
+      candidateName: app.Fullname || app.userId?.Fullname || 'Unknown Candidate',
+      roleTitle: app.jobtitle || app.jobId?.jobtitle || 'Unknown Role',
+      jobTitle: app.jobId?.jobtitle || 'Unknown Job',
+      experience: app.Experience || '0-1 Years',
+      matchScore: app.has_required_skill ? 95 : 60, // Mock score for now
+      status: app.status || 'Applied',
+      appliedDate: app.createdAt ? new Date(app.createdAt).toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric'
+      }) : 'N/A',
+      applicationStatus: app.status || 'Applied',
+      interviewStatus: app.status === 'Applied' ? 'Pending' : app.status,
+      shortlistedBy: app.status === 'Shortlisted' ? 'Recruiter' : null,
+      skills: app.userId?.skills || [], // If skills exist in userId
+      education: app.userId?.education || '',
+      certifications: app.userId?.certifications || [],
+      profilePic: app.userId?.profilePic || '',
+      email: app.userId?.email || '',
+      number: app.number || app.userId?.number || '',
+      location: app.location || 'Remote',
+      resume: app.Resume || '',
+      description: app.Description || '',
+      salary: app.Salary || {},
+      socialLinks: app.SocialLinks || {},
+      experienceTimeline: [], // If available
+      rating: 4, // Default rating
+    }));
+  }, [applications]);
 
   const sorted = useMemo(() => {
-    const copy = [...applications];
+    const copy = [...mappedApplications];
     switch (sortBy) {
       case 'Highest Match %':
         copy.sort((a, b) => b.matchScore - a.matchScore);
@@ -127,7 +68,15 @@ const ApplicationsList = ({ onViewProfile }) => {
         );
     }
     return copy;
-  }, [applications, sortBy]);
+  }, [mappedApplications, sortBy]);
+
+  if (applicationsLoading) {
+    return (
+      <div className="flex items-center justify-center p-12">
+        <div className="w-8 h-8 border-4 border-teal-500 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <section className="bg-transparent">
@@ -135,7 +84,7 @@ const ApplicationsList = ({ onViewProfile }) => {
       <div className="px-1 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-2">
         <div>
           <h2 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight">
-            Applications
+            Applications ({sorted.length})
           </h2>
           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.25em] mt-1">
             Review, shortlist, and move candidates through your hiring pipeline.
@@ -164,13 +113,19 @@ const ApplicationsList = ({ onViewProfile }) => {
 
       {/* Rows */}
       <div className="space-y-6">
-        {sorted.map((app) => (
-          <ApplicationCard 
-            key={app.id} 
-            application={app} 
-            onViewProfile={onViewProfile} 
-          />
-        ))}
+        {sorted.length > 0 ? (
+          sorted.map((app) => (
+            <ApplicationCard 
+              key={app.id} 
+              application={app} 
+              onViewProfile={onViewProfile} 
+            />
+          ))
+        ) : (
+          <div className="bg-white rounded-2xl border border-slate-100 p-12 text-center">
+            <p className="text-slate-500 font-medium">No applications found.</p>
+          </div>
+        )}
       </div>
     </section>
   );

@@ -9,11 +9,11 @@ import SkillMatchStats from "../../Components/SkillMatch/SkillMatchStats";
 import JobCandidateMatchPanel from "../../Components/ManageJob/JobCandidateMatchPanel";
 
 const SkillMatch = () => {
-  const { user, loading } = useAuth();
+  const { user, loading, token } = useAuth();
   const navigate = useNavigate();
-  const [selectedJob, setSelectedJob] = useState("Senior Full Stack Developer");
-  const [isJobDropdownOpen, setIsJobDropdownOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [matchData, setMatchData] = useState([]);
+  const [isFetching, setIsFetching] = useState(false);
 
   const getUserRole = (currentUser) => {
     const rawRole = currentUser?.role || currentUser?.Role || "";
@@ -35,14 +35,34 @@ const SkillMatch = () => {
     }
   }, [user, loading, navigate]);
 
-  const activeJobs = [
-    "Senior Full Stack Developer",
-    "Product Designer (UI/UX)",
-    "Marketing Manager",
-    "DevOps Engineer",
-  ];
+  // Fetch match data
+  useEffect(() => {
+    const fetchShortlist = async () => {
+      if (!token) return;
+      setIsFetching(true);
+      try {
+        const response = await fetch("http://localhost:4518/gknbvg/SkillPort-recruiter/ertqyuiok/ShortListApplication", {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        const result = await response.json();
+        if (result.success) {
+          setMatchData(result.data);
+        }
+      } catch (error) {
+        console.error("Error fetching shortlist:", error);
+      } finally {
+        setIsFetching(false);
+      }
+    };
 
-  if (loading) {
+    if (user && getUserRole(user) === "recruiter") {
+      fetchShortlist();
+    }
+  }, [token, user]);
+
+  if (loading || isFetching) {
     return (
       <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center">
         <div className="w-12 h-12 border-4 border-teal-500 border-t-transparent rounded-full animate-spin" />
@@ -52,6 +72,11 @@ const SkillMatch = () => {
 
   const roleStr = getUserRole(user);
   if (!user || roleStr !== "recruiter") return null;
+
+  const joinMeeting = (meetingLink) => {
+    const roomCode = meetingLink.split('/').pop();
+    navigate(`/meet/${roomCode}`);
+  };
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] font-inter">
@@ -70,12 +95,10 @@ const SkillMatch = () => {
             {/* Center: Main Content */}
             <div className="flex-1 min-w-0">
               {/* Stats Summary */}
-              <SkillMatchStats />
+              <SkillMatchStats totalJobs={matchData.length} />
 
-             
-
-              {/* 70% AI candidate card + 30% matching jobs panel */}
-              <JobCandidateMatchPanel />
+              {/* Match Panel with real data */}
+              <JobCandidateMatchPanel matchData={matchData} onJoinMeeting={joinMeeting} />
             </div>
           </div>
         </main>

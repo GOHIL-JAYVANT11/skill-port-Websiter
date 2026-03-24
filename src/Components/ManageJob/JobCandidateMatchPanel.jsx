@@ -1,83 +1,67 @@
-import React from 'react';
-import { Briefcase, Sparkles, ArrowUpRight } from 'lucide-react';
+import React, { useState } from 'react';
+import { Briefcase, Sparkles, ArrowUpRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import MatchedCandidateCard from '../SkillMatch/MatchedCandidateCard';
+import ScheduleInterviewModal from '../SkillMatch/ScheduleInterviewModal';
+import { useAuth } from '../../Context/AuthContext';
+import { toast } from 'sonner';
 
-const JobCandidateMatchPanel = () => {
-  const candidates = [
-    {
-      id: 1,
-      name: 'Alex Rivera',
-      role: 'Full Stack Engineer',
-      match: 98,
-      experience: '6 Years',
-      location: 'San Francisco, CA',
-      salary: '$140k - $160k',
-      shortlisted: true,
-      skills: {
-        matched: ['React', 'Node.js', 'TypeScript', 'PostgreSQL', 'AWS'],
-        missing: ['GraphQL'],
-      },
-    },
-    {
-      id: 2,
-      name: 'Sarah Chen',
-      role: 'Frontend Architect',
-      match: 92,
-      experience: '8 Years',
-      location: 'Austin, TX',
-      salary: '$150k - $170k',
-      shortlisted: false,
-      skills: {
-        matched: ['React', 'TypeScript', 'Tailwind CSS', 'Redux', 'System Design'],
-        missing: ['Node.js', 'Express'],
-      },
-    },
-    {
-      id: 3,
-      name: 'Marcus Johnson',
-      role: 'Senior Backend Developer',
-      match: 85,
-      experience: '5 Years',
-      location: 'Remote',
-      salary: '$130k - $150k',
-      shortlisted: false,
-      skills: {
-        matched: ['Node.js', 'PostgreSQL', 'Docker', 'Redis'],
-        missing: ['React', 'TypeScript'],
-      },
-    },
-  ];
+const JobCandidateMatchPanel = ({ matchData = [], onJoinMeeting }) => {
+  const { token } = useAuth();
+  const [modalState, setModalState] = useState({
+    isOpen: false,
+    candidate: null,
+    job: null
+  });
 
-  const jobs = [
-    {
-      id: 'JOB-2026-001',
-      title: 'Senior React Developer',
-      skills: ['React', 'TypeScript', 'Node.js', 'AWS'],
-    },
-    {
-      id: 'JOB-2026-002',
-      title: 'Product Designer (UI/UX)',
-      skills: ['Figma', 'UI Design', 'Prototyping', 'User Research'],
-    },
-    {
-      id: 'JOB-2026-003',
-      title: 'Backend Engineer',
-      skills: ['Node.js', 'PostgreSQL', 'Docker', 'Redis'],
-    },
-  ];
+  const handleOpenModal = (candidate, job) => {
+    setModalState({
+      isOpen: true,
+      candidate,
+      job
+    });
+  };
 
-  const getJobMatchesForCandidate = (candidate) => {
-    const candidateSkills = candidate.skills?.matched || [];
+  const handleCloseModal = () => {
+    setModalState({
+      isOpen: false,
+      candidate: null,
+      job: null
+    });
+  };
 
-    return jobs
-      .map((job) => {
-        const overlap = candidateSkills.filter((skill) => job.skills.includes(skill));
-        const score =
-          job.skills.length === 0 ? 0 : Math.round((overlap.length / job.skills.length) * 100);
-        return { ...job, overlap, score };
-      })
-      .filter((j) => j.score > 0)
-      .sort((a, b) => b.score - a.score);
+  const handleScheduleSubmit = async (formData) => {
+    if (!token) {
+      toast.error('Session expired. Please login again.');
+      return;
+    }
+
+    const payload = {
+      candidateId: modalState.candidate.userId,
+      jobId: modalState.job?._id || modalState.job?.id || modalState.job,
+      ...formData
+    };
+
+    try {
+      const response = await fetch('http://localhost:4518/gknbvg/SkillPort-recruiter/ertqyuiok/schedule-meeting', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(payload)
+      });
+
+      const result = await response.json();
+      if (result.success) {
+        toast.success('Interview scheduled successfully!');
+        handleCloseModal();
+      } else {
+        toast.error(result.message || 'Failed to schedule interview');
+      }
+    } catch (error) {
+      console.error('Error scheduling meeting:', error);
+      toast.error('An error occurred. Please try again.');
+    }
   };
 
   return (
@@ -98,90 +82,156 @@ const JobCandidateMatchPanel = () => {
         </div>
       </div>
 
-      <div className="space-y-8">
-        {candidates.map((candidate) => {
-          const bestJobMatches = getJobMatchesForCandidate(candidate);
+      <div className="space-y-12">
+        {matchData.map((jobGroup, groupIdx) => {
+          if (jobGroup.applications.length === 0) return null;
 
           return (
-            <div
-              key={candidate.id}
-              className="flex flex-col xl:flex-row gap-6"
-            >
-              <div className="xl:flex-[7] min-w-0">
-                <MatchedCandidateCard candidate={candidate} />
-              </div>
-
-              <aside className="xl:flex-[3] w-full xl:w-auto">
-                <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-5 sticky top-24 space-y-4">
-                  <div className="flex items-start justify-between gap-2">
-                    <div>
-                      <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.25em]">
-                        Matching Job Listings
-                      </p>
-                      <h3 className="text-sm font-black text-slate-900 tracking-tight mt-1">
-                        30% view – how this candidate fits your jobs
-                      </h3>
-                    </div>
-                    <div className="p-2 rounded-xl bg-teal-50 text-teal-600">
-                      <Briefcase className="w-4 h-4" />
-                    </div>
-                  </div>
-
-                  {bestJobMatches.length === 0 ? (
-                    <p className="text-[11px] text-slate-500">
-                      No strong skill overlap found between this candidate and your current job posts.
-                    </p>
-                  ) : (
-                    <div className="space-y-3">
-                      {bestJobMatches.map((job) => (
-                        <div
-                          key={job.id}
-                          className="p-3 rounded-2xl border border-slate-100 bg-slate-50/60 hover:bg-white hover:border-teal-100 transition-all group"
-                        >
-                          <div className="flex items-start justify-between gap-2 mb-1.5">
-                            <div>
-                              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                                {job.id}
-                              </p>
-                              <p className="text-xs font-black text-slate-900 leading-snug">
-                                {job.title}
-                              </p>
-                            </div>
-                            <span
-                              className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest ${
-                                job.score >= 75
-                                  ? 'bg-emerald-50 text-emerald-700 border border-emerald-100'
-                                  : 'bg-amber-50 text-amber-700 border border-amber-100'
-                              }`}
-                            >
-                              {job.score}% Match
-                            </span>
-                          </div>
-                          <p className="text-[10px] text-slate-500 mb-1">
-                            Overlap on{' '}
-                            <span className="font-semibold text-slate-700">
-                              {job.overlap.join(', ') || 'no primary skills'}
-                            </span>
-                          </p>
-                          <button className="mt-1 inline-flex items-center gap-1 text-[10px] font-black text-teal-700 uppercase tracking-[0.2em] group-hover:translate-x-0.5 transition-transform">
-                            View job details
-                            <ArrowUpRight className="w-3 h-3" />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  <p className="text-[9px] font-bold text-slate-400 uppercase tracking-[0.25em] pt-1 border-t border-dashed border-slate-100 mt-2">
-                    70% candidate insights • 30% job match view
-                  </p>
-                </div>
-              </aside>
-            </div>
+            <JobGroupRow 
+              key={jobGroup.jobPost._id || groupIdx} 
+              jobGroup={jobGroup} 
+              onSchedule={(candidate) => handleOpenModal(candidate, jobGroup.jobPost)}
+              onJoinMeeting={onJoinMeeting}
+            />
           );
         })}
+        {matchData.every(g => g.applications.length === 0) && (
+          <div className="bg-white rounded-3xl border border-slate-100 p-12 text-center">
+            <p className="text-slate-500 font-medium italic">No shortlisted applications found for your jobs.</p>
+          </div>
+        )}
       </div>
+
+      <ScheduleInterviewModal
+        isOpen={modalState.isOpen}
+        onClose={handleCloseModal}
+        onSubmit={handleScheduleSubmit}
+        candidateName={modalState.candidate?.name}
+        jobTitle={modalState.job?.jobtitle}
+      />
     </section>
+  );
+};
+
+const JobGroupRow = ({ jobGroup, onSchedule, onJoinMeeting }) => {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const currentApp = jobGroup.applications[currentIndex];
+  const totalApps = jobGroup.applications.length;
+
+  const nextApp = () => setCurrentIndex((prev) => (prev + 1) % totalApps);
+  const prevApp = () => setCurrentIndex((prev) => (prev - 1 + totalApps) % totalApps);
+
+  // Map API application to MatchedCandidateCard format
+  const mappedCandidate = {
+    id: currentApp._id,
+    userId: currentApp.userId?._id || currentApp.userId, // Safely get userId whether populated or not
+    name: currentApp.Fullname || currentApp.userId?.Fullname || 'Unknown Candidate',
+    role: currentApp.jobtitle || 'Candidate',
+    match: currentApp.matchScore || 0,
+    experience: currentApp.Experience || 'Not specified',
+    location: currentApp.location || 'Remote',
+    salary: currentApp.Salary?.ExpectedSalary ? `₹${currentApp.Salary.ExpectedSalary}` : 'Not disclosed',
+    shortlisted: true,
+    photo: currentApp.userId?.profilePic,
+    skills: {
+      matched: currentApp.Skill || [],
+      missing: jobGroup.jobPost.MandatorySkills?.filter(s => !(currentApp.Skill || []).includes(s)) || [],
+    },
+    meetingStatus: currentApp.meetingStatus,
+    meetingLink: currentApp.meetingLink,
+  };
+
+  return (
+    <div className="flex flex-col xl:flex-row gap-6">
+      {/* Left: Big Card with Pagination */}
+      <div className="xl:flex-[7] min-w-0 flex flex-col gap-4">
+        <MatchedCandidateCard 
+          candidate={mappedCandidate} 
+          onSchedule={onSchedule}
+          onJoinMeeting={onJoinMeeting}
+        />
+        
+        {/* Pagination Bottom */}
+        {totalApps > 1 && (
+          <div className="flex items-center justify-center gap-4 bg-white/50 backdrop-blur-sm rounded-2xl py-2 px-4 border border-slate-100 w-fit mx-auto shadow-sm">
+            <button 
+              onClick={prevApp}
+              className="p-1.5 rounded-xl hover:bg-white hover:shadow-md transition-all text-slate-400 hover:text-teal-600 border border-transparent hover:border-teal-100"
+            >
+              <ChevronLeft className="w-5 h-5" />
+            </button>
+            <div className="flex items-center gap-1.5 px-3">
+              <span className="text-sm font-black text-teal-600">{currentIndex + 1}</span>
+              <span className="text-xs font-bold text-slate-300 uppercase tracking-widest">of</span>
+              <span className="text-sm font-black text-slate-400">{totalApps}</span>
+            </div>
+            <button 
+              onClick={nextApp}
+              className="p-1.5 rounded-xl hover:bg-white hover:shadow-md transition-all text-slate-400 hover:text-teal-600 border border-transparent hover:border-teal-100"
+            >
+              <ChevronRight className="w-5 h-5" />
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Right: Small Job Card */}
+      <aside className="xl:flex-[3] w-full xl:w-auto">
+        <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-5 sticky top-24 space-y-5">
+          <div className="flex items-start justify-between gap-2">
+            <div>
+              <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.25em]">
+                Matching Job Listings
+              </p>
+              <h3 className="text-sm font-black text-slate-900 tracking-tight mt-1">
+                Candidate's match for your job
+              </h3>
+            </div>
+            <div className="p-2 rounded-xl bg-teal-50 text-teal-600">
+              <Briefcase className="w-4 h-4" />
+            </div>
+          </div>
+
+          <div className="p-4 rounded-2xl border border-teal-100 bg-teal-50/20 hover:bg-white transition-all group">
+            <div className="flex items-start justify-between gap-2 mb-2">
+              <div>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                  {jobGroup.jobPost._id.slice(-6).toUpperCase()}
+                </p>
+                <p className="text-xs font-black text-slate-900 leading-snug">
+                  {jobGroup.jobPost.jobtitle}
+                </p>
+              </div>
+              <span className="px-2 py-0.5 rounded-full bg-teal-100 text-teal-700 text-[9px] font-black uppercase tracking-widest border border-teal-200">
+                {mappedCandidate.match}% Match
+              </span>
+            </div>
+
+            <div className="space-y-2 mb-3">
+              <div className="flex items-center gap-2 text-[10px] text-slate-500">
+                <Briefcase className="w-3 h-3" />
+                <span>{jobGroup.jobPost.EmploymentType} · {jobGroup.jobPost.Experience} Exp</span>
+              </div>
+              <div className="flex items-center gap-2 text-[10px] text-slate-500">
+                <Sparkles className="w-3 h-3" />
+                <span>{jobGroup.jobPost.MandatorySkills?.slice(0, 3).join(', ')}</span>
+              </div>
+            </div>
+
+            <button className="w-full py-2 rounded-xl bg-white border border-slate-200 text-[10px] font-black text-slate-600 uppercase tracking-widest hover:border-teal-500 hover:text-teal-700 transition-all flex items-center justify-center gap-2">
+              View job details
+              <ArrowUpRight className="w-3 h-3" />
+            </button>
+          </div>
+
+          <div className="pt-4 border-t border-dashed border-slate-100">
+            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-[0.25em]">
+              {totalApps} Total Applications for this job
+            </p>
+          </div>
+        </div>
+      </aside>
+    </div>
   );
 };
 

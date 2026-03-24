@@ -1,7 +1,10 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Briefcase, FileText, Calendar, MessageSquare, Rocket, Shield, Clock, ExternalLink } from 'lucide-react';
 
 const NotificationCard = ({ notification }) => {
+  const navigate = useNavigate();
+
   const getIcon = (type) => {
     switch (type) {
       case 'job': return <Briefcase className="w-5 h-5 text-teal-600" />;
@@ -16,11 +19,19 @@ const NotificationCard = ({ notification }) => {
 
   const isUnread = !notification.isRead;
 
+  const handleClick = () => {
+    if (notification.actionUrl) {
+      navigate(notification.actionUrl);
+    }
+  };
+
   return (
-    <div className={`group relative p-4 sm:p-5 rounded-xl border transition-all duration-300 cursor-pointer ${
+    <div 
+      onClick={handleClick}
+      className={`group relative p-4 sm:p-5 rounded-xl border transition-all duration-300 cursor-pointer ${
       isUnread 
         ? 'bg-teal-50/50 border-teal-100 shadow-sm' 
-        : 'bg-white border-slate-100 hover:border-slate-200'
+        : 'bg-white border-slate-100 hover:border-slate-200 hover:shadow-md'
     }`}>
       {/* Unread Indicator */}
       {isUnread && (
@@ -29,7 +40,7 @@ const NotificationCard = ({ notification }) => {
 
       <div className="flex gap-4">
         {/* Icon Container */}
-        <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center shrink-0 ${
+        <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center shrink-0 transition-transform group-hover:scale-110 ${
           isUnread ? 'bg-white shadow-sm' : 'bg-slate-50'
         }`}>
           {getIcon(notification.type)}

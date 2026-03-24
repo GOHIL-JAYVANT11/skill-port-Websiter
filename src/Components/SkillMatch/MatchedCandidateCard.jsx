@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { User, MapPin, DollarSign, Zap, Star, MoreVertical, Calendar, CheckSquare, MessageSquare, BrainCircuit, Sparkles, AlertCircle, ChevronDown, ChevronUp, CheckCircle2 } from 'lucide-react';
+import { User, MapPin, DollarSign, Zap, Star, MoreVertical, Calendar, CheckSquare, MessageSquare, BrainCircuit, Sparkles, AlertCircle, ChevronDown, ChevronUp, CheckCircle2, Video } from 'lucide-react';
 
-const MatchedCandidateCard = ({ candidate }) => {
+const MatchedCandidateCard = ({ candidate, onSchedule, onJoinMeeting }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
   const getMatchColor = (match) => {
@@ -38,7 +38,7 @@ const MatchedCandidateCard = ({ candidate }) => {
                     <img src={candidate.photo} alt={candidate.name} className="w-full h-full object-cover" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center bg-gradient-to-tr from-slate-700 to-slate-900 text-white text-xl font-black uppercase">
-                      {candidate.name.split(' ').map(n => n[0]).join('')}
+                      {(candidate.name || 'U').split(' ').map(n => n[0]).join('')}
                     </div>
                   )}
                 </div>
@@ -113,13 +113,13 @@ const MatchedCandidateCard = ({ candidate }) => {
               </div>
               
               <div className="flex flex-wrap gap-2">
-                {candidate.skills.matched.map((skill, i) => (
+                {(candidate.skills?.matched || []).map((skill, i) => (
                   <span key={i} className="px-3 py-1.5 bg-emerald-50 text-emerald-700 text-[10px] font-black rounded-xl border border-emerald-100 flex items-center gap-1.5">
                     <CheckCircle2 className="w-3 h-3" />
                     {skill}
                   </span>
                 ))}
-                {!isExpanded && candidate.skills.missing.length > 0 && (
+                {!isExpanded && (candidate.skills?.missing?.length || 0) > 0 && (
                   <span className="px-3 py-1.5 bg-slate-100 text-slate-400 text-[10px] font-black rounded-xl border border-slate-200">
                     +{candidate.skills.missing.length} missing
                   </span>
@@ -135,7 +135,7 @@ const MatchedCandidateCard = ({ candidate }) => {
                         Missing Skills
                       </h5>
                       <div className="flex flex-wrap gap-2">
-                        {candidate.skills.missing.map((skill, i) => (
+                        {(candidate.skills?.missing || []).map((skill, i) => (
                           <span key={i} className="px-3 py-1.5 bg-rose-50 text-rose-600 text-[10px] font-black rounded-xl border border-rose-100">
                             {skill}
                           </span>
@@ -148,7 +148,7 @@ const MatchedCandidateCard = ({ candidate }) => {
                         AI Upskilling Suggestion
                       </h5>
                       <p className="text-[11px] text-slate-600 font-medium leading-relaxed italic">
-                        "Candidate shows high potential.Upskilling in <span className="font-bold text-slate-900">{candidate.skills.missing[0]}</span> would make them a perfect fit for this role."
+                        "Candidate shows high potential.Upskilling in <span className="font-bold text-slate-900">{candidate.skills?.missing?.[0] || 'required skills'}</span> would make them a perfect fit for this role."
                       </p>
                     </div>
                   </div>
@@ -158,10 +158,23 @@ const MatchedCandidateCard = ({ candidate }) => {
 
             {/* Bottom Actions */}
             <div className="flex flex-col sm:flex-row items-center gap-3">
-              <button className="w-full sm:w-auto px-8 py-3.5 bg-slate-900 text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-2xl hover:bg-teal-600 transition-all active:scale-95 shadow-xl shadow-slate-900/10 flex items-center justify-center gap-2">
-                <Calendar className="w-4 h-4" />
-                Schedule Interview
-              </button>
+              {candidate.meetingStatus === "Scheduled" ? (
+                <button 
+                  onClick={() => onJoinMeeting?.(candidate.meetingLink)}
+                  className="w-full sm:w-auto px-8 py-3.5 bg-teal-600 text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-2xl hover:bg-teal-700 transition-all active:scale-95 shadow-xl shadow-teal-600/20 flex items-center justify-center gap-2"
+                >
+                  <Video className="w-4 h-4" />
+                  Join Meeting
+                </button>
+              ) : (
+                <button 
+                  onClick={() => onSchedule?.(candidate)}
+                  className="w-full sm:w-auto px-8 py-3.5 bg-slate-900 text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-2xl hover:bg-teal-600 transition-all active:scale-95 shadow-xl shadow-slate-900/10 flex items-center justify-center gap-2"
+                >
+                  <Calendar className="w-4 h-4" />
+                  Schedule Interview
+                </button>
+              )}
               <button className="w-full sm:w-auto px-8 py-3.5 bg-white border border-slate-200 text-slate-600 text-[10px] font-black uppercase tracking-[0.2em] rounded-2xl hover:bg-slate-50 transition-all active:scale-95 flex items-center justify-center gap-2">
                 <User className="w-4 h-4" />
                 View Full Profile

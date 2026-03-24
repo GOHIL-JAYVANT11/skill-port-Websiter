@@ -32,7 +32,7 @@ const ApplicationsProfileDrawer = ({ application, isOpen, onClose }) => {
           {/* Summary */}
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-teal-500 to-teal-700 flex items-center justify-center text-white font-black text-lg shadow-md">
-              {application.candidateName
+              {(application.candidateName || 'U')
                 .split(' ')
                 .map((n) => n[0])
                 .join('')}
@@ -56,7 +56,7 @@ const ApplicationsProfileDrawer = ({ application, isOpen, onClose }) => {
               Key Skills
             </p>
             <div className="flex flex-wrap gap-2">
-              {application.skills.map((skill) => (
+              {(application.skills || []).map((skill) => (
                 <span
                   key={skill}
                   className="px-2.5 py-1 rounded-full bg-slate-50 border border-slate-200 text-[11px] font-bold text-slate-700"
@@ -73,11 +73,11 @@ const ApplicationsProfileDrawer = ({ application, isOpen, onClose }) => {
               Experience Timeline
             </p>
             <div className="space-y-3">
-              {application.experienceTimeline.map((item, idx) => (
+              {(application.experienceTimeline || []).map((item, idx) => (
                 <div key={idx} className="flex gap-3">
                   <div className="mt-1">
                     <div className="w-2 h-2 rounded-full bg-teal-500" />
-                    {idx !== application.experienceTimeline.length - 1 && (
+                    {idx !== (application.experienceTimeline?.length || 0) - 1 && (
                       <div className="w-px h-8 bg-slate-200 mx-auto" />
                     )}
                   </div>
@@ -91,6 +91,9 @@ const ApplicationsProfileDrawer = ({ application, isOpen, onClose }) => {
                   </div>
                 </div>
               ))}
+              {(!application.experienceTimeline || application.experienceTimeline.length === 0) && (
+                <p className="text-[11px] text-slate-400 italic">No detailed timeline provided.</p>
+              )}
             </div>
           </section>
 
@@ -104,7 +107,7 @@ const ApplicationsProfileDrawer = ({ application, isOpen, onClose }) => {
                 </p>
               </div>
               <p className="text-xs font-semibold text-slate-900">
-                {application.education}
+                {application.education || 'Not specified'}
               </p>
             </div>
 
@@ -116,11 +119,14 @@ const ApplicationsProfileDrawer = ({ application, isOpen, onClose }) => {
                 </p>
               </div>
               <ul className="space-y-1">
-                {application.certifications.map((cert) => (
+                {(application.certifications || []).map((cert) => (
                   <li key={cert} className="text-[11px] text-slate-700">
                     {cert}
                   </li>
                 ))}
+                {(!application.certifications || application.certifications.length === 0) && (
+                  <li className="text-[11px] text-slate-400 italic">None provided</li>
+                )}
               </ul>
             </div>
           </section>

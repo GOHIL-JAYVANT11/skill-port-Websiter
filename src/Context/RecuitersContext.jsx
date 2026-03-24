@@ -20,7 +20,7 @@ export const RecuitersProvider = ({ children }) => {
     fetchingRef.current = true;
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:4518/gknbvg/SkillPort-admin/ertqyuiok/get-all-recruiters', {
+      const response = await fetch('http://localhost:4518/gknbvg/SkillPort-recruiter/ertqyuiok/get-all-Recuiters', {
         headers: {
           'Authorization': `Bearer ${token}`
         }

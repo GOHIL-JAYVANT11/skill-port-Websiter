@@ -1,74 +1,98 @@
-import React, { useState } from 'react';
-import { Filter, CheckCheck, ChevronDown, Bell } from 'lucide-react';
+import React, { useState, useEffect, useContext, useCallback } from 'react';
+import { Filter, CheckCheck, ChevronDown, Bell, Loader2 } from 'lucide-react';
 import NotificationCard from './NotificationCard';
+import { AuthContext } from '../../Context/AuthContext';
+import { toast } from 'sonner';
 
 const NotificationListing = () => {
+  const { token } = useContext(AuthContext);
   const [filter, setFilter] = useState('All');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [notifications, setNotifications] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   const categories = ['All', 'Jobs', 'Applications', 'Interviews', 'Messages', 'Freelance', 'System'];
 
-  const notifications = [
-    {
-      id: 1,
-      type: 'job',
-      category: 'Jobs',
-      title: 'New job matched your React skills',
-      description: 'A Senior Frontend Developer position in Ahmedabad matches 92% of your skills. Apply now to get prioritized.',
-      timestamp: '2 hours ago',
-      isRead: false,
-      match: 92
-    },
-    {
-      id: 2,
-      type: 'application',
-      category: 'Applications',
-      title: 'Your application was shortlisted',
-      description: 'Congratulations! Your application for Full Stack Developer at Nexus AI has been shortlisted for the next round.',
-      timestamp: '5 hours ago',
-      isRead: false
-    },
-    {
-      id: 3,
-      type: 'interview',
-      category: 'Interviews',
-      title: 'Interview scheduled',
-      description: 'Your technical interview with SkillTech Pvt Ltd is scheduled for 26 Feb at 3:00 PM. Check your email for the meeting link.',
-      timestamp: 'Yesterday',
-      isRead: true
-    },
-    {
-      id: 4,
-      type: 'message',
-      category: 'Messages',
-      title: 'New message from ABC Company',
-      description: 'The hiring manager from ABC Company sent you a message regarding your recent application.',
-      timestamp: 'Yesterday',
-      isRead: true
-    },
-    {
-      id: 5,
-      type: 'freelance',
-      category: 'Freelance',
-      title: 'Milestone payment released',
-      description: 'Good news! Milestone 2 payment for "Build React Admin Dashboard" has been released from escrow to your wallet.',
-      timestamp: '2 days ago',
-      isRead: true
-    },
-    {
-      id: 6,
-      type: 'system',
-      category: 'System',
-      title: 'Profile completion alert',
-      description: 'Your profile is only 60% complete. Adding your portfolio and education can increase your profile visibility by 3x.',
-      timestamp: '3 days ago',
-      isRead: true
+  const fetchNotifications = useCallback(async () => {
+    if (!token) return;
+    setIsLoading(true);
+    try {
+      const response = await fetch('http://localhost:4518/gknbvg/SkillPort-user/ertqyuiok/notifications', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      const data = await response.json();
+      if (data.success) {
+        // Map API data to component format
+        const mappedData = data.data.map(n => ({
+          id: n._id,
+          title: n.title,
+          description: n.message,
+          type: n.type.toLowerCase(), // application, job, etc.
+          category: n.type === 'APPLICATION' ? 'Applications' : 
+                    n.type === 'JOB' ? 'Jobs' : 
+                    n.type === 'INTERVIEW' ? 'Interviews' : 
+                    n.type === 'MESSAGE' ? 'Messages' : 
+                    n.type === 'FREELANCE' ? 'Freelance' : 'System',
+          timestamp: n.createdAt,
+          isRead: n.isRead,
+          actionUrl: n.actionUrl
+        }));
+        setNotifications(mappedData);
+      } else {
+        toast.error(data.message || 'Failed to fetch notifications');
+      }
+    } catch (error) {
+      console.error('Error fetching notifications:', error);
+      toast.error('An error occurred while fetching notifications');
+    } finally {
+      setIsLoading(false);
     }
-  ];
+  }, [token]);
+
+  useEffect(() => {
+    fetchNotifications();
+  }, [fetchNotifications]);
+
+  const formatTimestamp = (dateStr) => {
+    const date = new Date(dateStr);
+    const now = new Date();
+    const diffInMs = now - date;
+    const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
+    const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
+
+    if (diffInHours < 1) return 'Just now';
+    if (diffInHours < 24) return `${diffInHours} hour${diffInHours > 1 ? 's' : ''} ago`;
+    if (diffInDays === 1) return 'Yesterday';
+    if (diffInDays < 7) return `${diffInDays} day${diffInDays > 1 ? 's' : ''} ago`;
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  };
 
   const filteredNotifications = filter === 'All' 
     ? notifications 
     : notifications.filter(n => n.category === filter);
+
+  // Grouping logic
+  const isToday = (dateStr) => {
+    const date = new Date(dateStr);
+    const today = new Date();
+    return date.getDate() === today.getDate() &&
+      date.getMonth() === today.getMonth() &&
+      date.getFullYear() === today.getFullYear();
+  };
+
+  const todayNotifications = filteredNotifications.filter(n => isToday(n.timestamp));
+  const earlierNotifications = filteredNotifications.filter(n => !isToday(n.timestamp));
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20">
+        <Loader2 className="w-10 h-10 text-teal-600 animate-spin mb-4" />
+        <p className="text-slate-500 font-bold uppercase tracking-widest text-[10px]">Syncing Updates...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full">
@@ -139,9 +163,15 @@ const NotificationListing = () => {
         <section>
           <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4 pl-1">Today</h3>
           <div className="space-y-3">
-            {filteredNotifications.filter(n => n.timestamp.includes('hours')).length > 0 ? (
-              filteredNotifications.filter(n => n.timestamp.includes('hours')).map(n => (
-                <NotificationCard key={n.id} notification={n} />
+            {todayNotifications.length > 0 ? (
+              todayNotifications.map(n => (
+                <NotificationCard 
+                  key={n.id} 
+                  notification={{
+                    ...n,
+                    timestamp: formatTimestamp(n.timestamp)
+                  }} 
+                />
               ))
             ) : (
               <p className="text-xs font-medium text-slate-400 italic py-2 pl-1">No updates for today</p>
@@ -150,14 +180,22 @@ const NotificationListing = () => {
         </section>
 
         {/* Earlier Group */}
-        <section>
-          <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4 pl-1">Earlier</h3>
-          <div className="space-y-3">
-            {filteredNotifications.filter(n => !n.timestamp.includes('hours')).map(n => (
-              <NotificationCard key={n.id} notification={n} />
-            ))}
-          </div>
-        </section>
+        {earlierNotifications.length > 0 && (
+          <section>
+            <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4 pl-1">Earlier</h3>
+            <div className="space-y-3">
+              {earlierNotifications.map(n => (
+                <NotificationCard 
+                  key={n.id} 
+                  notification={{
+                    ...n,
+                    timestamp: formatTimestamp(n.timestamp)
+                  }} 
+                />
+              ))}
+            </div>
+          </section>
+        )}
       </div>
     </div>
   );

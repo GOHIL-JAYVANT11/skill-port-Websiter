@@ -378,7 +378,15 @@ const ProfileSections = ({ user, onUpdateProfile }) => {
       const byteArray = new Uint8Array(byteNumbers);
       const blob = new Blob([byteArray], { type: 'application/pdf' });
       const url = URL.createObjectURL(blob);
-      window.open(url, '_blank');
+      const link = document.createElement('a');
+      link.href = url;
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      // Revoke after a delay to ensure the browser has started loading it
+      setTimeout(() => URL.revokeObjectURL(url), 100);
     } else {
       // If it's a regular URL, just open it
       window.open(resumeData, '_blank');
@@ -1104,7 +1112,7 @@ const ProfileSections = ({ user, onUpdateProfile }) => {
                   <Plus className="w-4 h-4 text-teal-600" />
                 </div>
               </div>
-              <p className="text-[11px] font-medium text-slate-500 leading-tight">
+              <div className="text-[11px] font-medium text-slate-500 leading-tight">
                 {user?.SocialLinks?.[0] && (
                     <div className="flex items-center gap-2 mr-2">
                       {user.SocialLinks[0].linkdIn && (
@@ -1124,7 +1132,7 @@ const ProfileSections = ({ user, onUpdateProfile }) => {
                       )}
                     </div>
                   )}
-              </p>
+              </div>
             </div>
           </div>
 
